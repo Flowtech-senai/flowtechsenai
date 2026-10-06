@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block conteudo %}
+<div class="container py-5 text-center" style="max-width: 600px;">
+    <h2 class="titulo-pagina" style="color: #007E83; font-weight: 700; letter-spacing: 1px;"> Selecione o Tipo de
+        Movimentação</h2> <!-- o usuário escolhe o tipo de movimentação que será feita -->
+
+    <div class="card p-5 shadow-sm bg-light">
+        <!-- O formulário envia a escolha diretamente para a rota do Flask gerenciar -->
+        <form action="{{ url_for('direcionar_movimentacao') }}" method="POST">
+            <div class="mb-4 text-start">
+                <label class="form-label fw-bold">Como deseja prosseguir?</label>
+                <select name="tipo_movimentacao" class="form-select form-select-lg" required>
+                    <option value="">Selecione uma opção...</option>
+                    <option value="entrada">Nova Entrada de Pedido (Abastecimento)</option>
+                    <option value="saida">Nova Saída de Pedido (Venda/Consumo)</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-success px-5 rounded-pill shadow-sm fw-bold">
+                Acessar Painel <i class="bi bi-arrow-right-circle ms-2"></i>
+            </button> <!-- direciona para a tela que foi selecionada -->
+        </form>
+    </div>
+</div>
+{% endblock %}

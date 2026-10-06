@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="{{ config.idioma if config and config.idioma else 'pt-BR' }}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flow Tech - Sistema de Gestão</title>
+
+    <!-- Bootstrap CSS e Ícones -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --sidebar-width-collapsed: 70px;
+            --sidebar-width-expanded: 250px;
+            --primary-color: #007E83;
+        }
+
+        /* --- ESTILOS DO MENU LATERAL --- */
+        .sidebar {
+            width: var(--sidebar-width-collapsed) !important;
+            height: 100vh;
+            background: linear-gradient(to right, #007E83, rgb(53, 181, 168));
+            color: white;
+            padding: 15px 10px 20px 10px !important;
+            position: fixed;
+            top: 0;
+            left: 0;
+            border-right: 1px solid #e0e0e0;
+            z-index: 1000;
+            overflow: hidden;
+            transition: width 0.3s ease;
+        }
+
+        .sidebar:hover,
+        .sidebar:focus-within {
+            width: var(--sidebar-width-expanded) !important;
+        }
+
+        .brand-logo {
+            width: 130px;
+            height: auto;
+            display: block;
+            margin-left: 50px;
+            margin-top: 20px;
+            transition: opacity 0.2s;
+            opacity: 0;
+        }
+
+        .sidebar:hover .brand-logo,
+        .sidebar:focus-within .brand-logo {
+            opacity: 1;
+        }
+
+        .logo-fechada {
+            margin-top: -54px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.2s ease;
+            opacity: 1;
+        }
+
+        .img-logo-pequena {
+            width: 60px;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .sidebar:hover .logo-fechada,
+        .sidebar:focus-within .logo-fechada {
+            display: none !important;
+        }
+
+        .nav-link {
+            color: #fff !important;
+            padding: 12px 15px !important;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.2s;
+            border-radius: 20px;
+            margin-bottom: 5px;
+            white-space: nowrap;
+        }
+
+        .nav-link:hover,
+        .nav-link:focus {
+            background-color: #004d50;
+            color: #ffffff !important;
+            outline: 2px solid #0099a7;
+        }
+
+        .nav-link.active {
+            color: #007E83 !important;
+            background-color: #e6f2f2;
+            border-right: 4px solid #007E83;
+            font-weight: 600;
+        }
+
+        .nav-link i {
+            font-size: 20px;
+            min-width: 30px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        /* Esconde elementos textuais no modo encolhido */
+        .nav-link .texto-link,
+        .perfil-menu summary span,
+        .perfil-menu summary i.bi-chevron-down,
+        .sidebar hr {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+        }
+
+        .sidebar:hover .nav-link .texto-link,
+        .sidebar:hover .perfil-menu summary span,
+        .sidebar:hover .perfil-menu summary i.bi-chevron-down,
+        .sidebar:hover .sidebar hr,
+        .sidebar:focus-within .nav-link .texto-link,
+        .sidebar:focus-within .perfil-menu summary span,
+        .sidebar:focus-within .perfil-menu summary i.bi-chevron-down,
+        .sidebar:focus-within .sidebar hr {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Área do conteúdo ao lado do menu */
+        .content-wrapper {
+            margin-left: var(--sidebar-width-collapsed) !important;
+            padding: 40px;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        /* Menu Perfil */
+        .perfil-menu {
+            position: relative;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .perfil-menu summary::-webkit-details-marker,
+        .perfil-menu summary {
+            padding: 8px 10px !important;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.2s;
+            border-radius: 20px;
+            list-style: none;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .perfil-menu summary:hover,
+        .perfil-menu summary:focus {
+            background-color: #004d50;
+            outline: 2px solid #0099a7;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            background-color: #7000c8;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            overflow: hidden;
+            flex-shrink: 0;
+            margin-right: 12px;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .perfil-opcoes {
+            position: absolute;
+            left: 70px;
+            top: 0;
+            background-color: #ffffff;
+            border: 1px solid #dddddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 12px;
+            min-width: 180px;
+            z-index: 999;
+        }
+
+        .sidebar:hover .perfil-opcoes,
+        .sidebar:focus-within .perfil-opcoes {
+            position: absolute;
+            right: 0;
+            left: auto;
+            top: 100%;
+            margin-top: 5px;
+        }
+
+        .perfil-opcoes a {
+            display: block;
+            color: #222222;
+            text-decoration: none;
+            padding: 8px 6px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .perfil-opcoes a:hover,
+        .perfil-opcoes a:focus {
+            color: #0056b3;
+            background-color: #f0f4f8;
+            outline: 1px solid #0056b3;
+        }
+
+        .perfil-opcoes hr {
+            border: 0;
+            border-top: 1px solid #eeeeee;
+            margin: 8px 0;
+            opacity: 1 !important;
+        }
+
+        .perfil-opcoes .btn-sair {
+            color: #c82333;
+        }
+
+        .perfil-opcoes .btn-sair:hover,
+        .perfil-opcoes .btn-sair:focus {
+            background-color: #fff5f5;
+            color: #801018;
+        }
+
+        /* --- BOTÃO FLUTUANTE DE ACESSIBILIDADE E PAINEL --- */
+        #btn-acessibilidade {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background-color: #0056b3;
+            color: #ffffff;
+            border: 2px solid #ffffff;
+            font-size: 26px;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        #btn-acessibilidade:hover {
+            background-color: #204872;
+            transform: scale(1.08);
+        }
+
+        #btn-acessibilidade:focus-visible {
+            outline: 4px solid #0099a7;
+            outline-offset: 2px;
+        }
+
+        #painel-acessibilidade {
+            position: fixed;
+            bottom: 90px;
+            right: 25px;
+            background-color: #ffffff;
+            border: 2px solid #0056b3;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            z-index: 9998;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 250px;
+        }
+
+        #painel-acessibilidade.painel-escondido {
+            display: none;
+        }
+
+        #painel-acessibilidade h3 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            text-align: center;
+            color: #111111;
+            font-weight: bold;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 6px;
+        }
+
+        .btn-acess-item {
+            padding: 10px 12px;
+            border: 1px solid #0056b3;
+            background-color: #f8f9fa;
+            color: #0056b3;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-acess-item:hover,
+        .btn-acess-item:focus {
+            background-color: #0056b3;
+            color: #ffffff;
+            outline: 2px solid #004faf;
+        }
+
+        .btn-acess-item.ativo {
+            background-color: #28a745 !important;
+            color: #ffffff !important;
+            border-color: #28a745 !important;
+        }
+
+        /* --- REGRAS DE MODO ESCURO --- */
+        body.modo-escuro {
+            background-color: #121212 !important;
+            color: #e0e0e0 !important;
+        }
+
+        body.modo-escuro .sidebar {
+            background: linear-gradient(to right, #0a2528, #13464a) !important;
+            border-right: 1px solid #2a2a2a;
+        }
+
+        body.modo-escuro .content-wrapper {
+            background-color: #121212 !important;
+            color: #e0e0e0 !important;
+        }
+
+        body.modo-escuro .card,
+        body.modo-escuro .perfil-opcoes,
+        body.modo-escuro #painel-acessibilidade {
+            background-color: #1e1e1e !important;
+            color: #ffffff !important;
+            border-color: #333333 !important;
+        }
+
+        body.modo-escuro table,
+        body.modo-escuro th,
+        body.modo-escuro td {
+            background-color: #1e1e1e !important;
+            color: #e0e0e0 !important;
+            border-color: #333333 !important;
+        }
+
+        body.modo-escuro input,
+        body.modo-escuro select,
+        body.modo-escuro textarea {
+            background-color: #2a2a2a !important;
+            color: #ffffff !important;
+            border: 1px solid #444444 !important;
+        }
+
+        body.modo-escuro .perfil-opcoes a {
+            color: #e0e0e0 !important;
+        }
+
+        body.modo-escuro .perfil-opcoes a:hover {
+            background-color: #2a2a2a !important;
+            color: #00b4d8 !important;
+        }
+
+        /* --- REGRAS DE ALTO CONTRASTE --- */
+        body.alto-contraste {
+            background-color: #f4f6f9 !important;
+            color: #000000 !important;
+        }
+
+        body.alto-contraste .sidebar {
+            background: #004d50 !important;
+            border-right: 3px solid #000000 !important;
+        }
+
+        body.alto-contraste .nav-link {
+            font-weight: bold !important;
+        }
+
+        body.alto-contraste .nav-link:hover,
+        body.alto-contraste .nav-link:focus {
+            background-color: #00c2d4 !important;
+            color: #000000 !important;
+            border-color: #000000 !important;
+        }
+
+        body.alto-contraste .content-wrapper {
+            background-color: #ffffff !important;
+        }
+
+        body.alto-contraste p,
+        body.alto-contraste h1,
+        body.alto-contraste h2,
+        body.alto-contraste h3,
+        body.alto-contraste h4,
+        body.alto-contraste h5,
+        body.alto-contraste h6,
+        body.alto-contraste td,
+        body.alto-contraste th,
+        body.alto-contraste label {
+            color: #000000 !important;
+            font-weight: 600 !important;
+        }
+
+        body.alto-contraste a {
+            color: #ffffff !important;
+            font-weight: bold !important;
+            text-decoration: underline !important;
+        }
+
+        body.alto-contraste .btn-primary {
+            background-color: #003366 !important;
+            border: 2px solid #000000 !important;
+            color: #ffffff !important;
+            font-weight: bold !important;
+        }
+
+        body.alto-contraste .btn-success {
+            background-color: #1e7e34 !important;
+            border: 2px solid #000000 !important;
+            color: #ffffff !important;
+            font-weight: bold !important;
+        }
+
+        body.alto-contraste .btn-danger {
+            background-color: #bd2130 !important;
+            border: 2px solid #000000 !important;
+            color: #ffffff !important;
+            font-weight: bold !important;
+        }
+
+        body.alto-contraste table,
+        body.alto-contraste .card,
+        body.alto-contraste input,
+        body.alto-contraste select,
+        body.alto-contraste textarea {
+            border: 2px solid #000000 !important;
+        }
+
+        /* Destaque visual ao passar o mouse */
+        body.leitura-hover-ativa *:hover {
+            outline: 2px dashed #0056b3 !important;
+            cursor: pointer;
+        }
+
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: #0099a7;
+            color: #000000;
+            padding: 8px 16px;
+            z-index: 10000;
+            font-weight: bold;
+            text-decoration: none;
+            transition: top 0.2s;
+        }
+
+        .skip-link:focus {
+            top: 0;
+        }
+
+        /* --- RESPONSIVIDADE (DISPOSITIVOS MÓVEIS) --- */
+        @media (max-width: 767px) {
+            .sidebar {
+                width: 100% !important;
+                height: 60px !important;
+                top: auto !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                padding: 0 !important;
+                display: flex !important;
+                align-items: center;
+                justify-content: space-around;
+                background: #007E83 !important;
+                border-right: none !important;
+                border-top: 1px solid #e0e0e0;
+                overflow: visible;
+            }
+
+            .sidebar:hover,
+            .sidebar:focus-within {
+                width: 100% !important;
+            }
+
+            .brand-logo,
+            .logo-fechada {
+                display: none !important;
+            }
+
+            .sidebar nav {
+                display: flex !important;
+                flex-direction: row !important;
+                width: 100%;
+                justify-content: space-around;
+                margin: 0 !important;
+            }
+
+            .nav-link {
+                padding: 10px !important;
+                margin: 0 !important;
+                border-radius: 50%;
+            }
+
+            .nav-link.active {
+                border-right: none !important;
+                border-bottom: 3px solid #007E83;
+            }
+
+            .nav-link i {
+                display: inline-block !important;
+                font-size: 22px;
+            }
+
+            .nav-link .texto-link,
+            .perfil-menu summary span,
+            .perfil-menu summary i.bi-chevron-down,
+            .sidebar hr {
+                display: none !important;
+            }
+
+            .content-wrapper {
+                margin-left: 0 !important;
+                padding: 20px !important;
+                padding-bottom: 90px !important;
+            }
+
+            .perfil-menu {
+                margin: 0 !important;
+            }
+
+            .perfil-menu summary {
+                padding: 0 !important;
+            }
+
+            .avatar {
+                margin: 0 !important;
+            }
+
+            .perfil-opcoes {
+                position: absolute !important;
+                bottom: 70px !important;
+                top: auto !important;
+                left: -50px !important;
+                right: auto !important;
+            }
+
+            #btn-acessibilidade {
+                bottom: 75px;
+                right: 15px;
+            }
+
+            #painel-acessibilidade {
+                bottom: 140px;
+                right: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body class="{% if config and config.tema == 'escuro' %}modo-escuro{% endif %}">
+
+
+
+    <a href="#conteudo-principal" class="skip-link">
+        {% if config and config.idioma == 'en-US' %}Skip to main content{% else %}Ir para o conteúdo principal{% endif
+        %}
+    </a>
+
+    <!-- MENU LATERAL -->
+    <aside class="sidebar" aria-label="Navegação Principal">
+        <img src="{{ url_for('static', filename='logo_letras_semfundo.png') }}" alt="Logo Flow Tech" class="brand-logo">
+
+        <div class="logo-fechada">
+            <img src="{{ url_for('static', filename='logosf-Photoroom.png') }}" alt="Símbolo Flow Tech"
+                class="img-logo-pequena">
+        </div>
+
+        <nav class="mt-2">
+            <details class="perfil-menu">
+                <summary class="perfil-topo" aria-label="Menu do Usuário">
+                    <div class="avatar">
+                        {% if usuario_foto and usuario_foto != 'imagens/sem-foto.png' %}
+                        <img src="{{ url_for('static', filename=usuario_foto) }}" alt="Foto do Usuário">
+                        {% else %}
+                        <img src="{{ url_for('static', filename='sem_foto.jpg') }}" alt="Foto Padrão do Usuário"
+                            id="avatar-preview">
+                        {% endif %}
+                    </div>
+                    <span class="texto-link">
+                        {% if config and config.idioma == 'en-US' %}My Account{% else %}Minha Conta{% endif %}
+                    </span>
+                    <i class="bi bi-chevron-down ms-1" aria-hidden="true"></i>
+                </summary>
+
+                <div class="perfil-opcoes" role="menu">
+                    <a href="{{ url_for('configuracao') }}" role="menuitem">
+                        {% if config and config.idioma == 'en-US' %}Settings{% else %}Configurações{% endif %}
+                    </a>
+                    <hr>
+                    <a href="{{ url_for('index') }}" class="btn-sair" role="menuitem">
+                        {% if config and config.idioma == 'en-US' %}Logout{% else %}Sair{% endif %}
+                    </a>
+                </div>
+            </details>
+
+            <hr class="mx-3" aria-hidden="true">
+
+            <a href="{{ url_for('dashboard') }}" class="nav-link">
+                <i class="bi bi-grid-1x2" aria-hidden="true"></i>
+                <span class="texto-link">
+                    {% if config and config.idioma == 'en-US' %}Home{% else %}Página Inicial{% endif %}
+                </span>
+            </a>
+            <a href="{{ url_for('menu_pedidos') }}" class="nav-link">
+                <i class="bi bi-cart-dash" aria-hidden="true"></i>
+                <span class="texto-link">
+                    {% if config and config.idioma == 'en-US' %}Orders{% else %}Pedidos{% endif %}
+                </span>
+            </a>
+            <a href="{{ url_for('listar_clientes') }}" class="nav-link">
+                <i class="bi bi-people" aria-hidden="true"></i>
+                <span class="texto-link">
+                    {% if config and config.idioma == 'en-US' %}Clients{% else %}Clientes{% endif %}
+                </span>
+            </a>
+            <a href="{{ url_for('fornecedores') }}" class="nav-link">
+                <i class="bi bi-truck" aria-hidden="true"></i>
+                <span class="texto-link">
+                    {% if config and config.idioma == 'en-US' %}Suppliers{% else %}Fornecedores{% endif %}
+                </span>
+            </a>
+            <a href="{{ url_for('listar_produtos') }}" class="nav-link">
+                <i class="bi bi-capsule" aria-hidden="true"></i>
+                <span class="texto-link">
+                    {% if config and config.idioma == 'en-US' %}Products{% else %}Produtos{% endif %}
+                </span>
+            </a>
+            <a href="{{ url_for('estoque') }}" class="nav-link">
+                <i class="bi bi-archive" aria-hidden="true"></i>
+                <span class="texto-link">
+                    {% if config and config.idioma == 'en-US' %}Inventory{% else %}Estoque{% endif %}
+                </span>
+            </a>
+            <a href="{{ url_for('funcionarios') }}" class="nav-link">
+                <i class="bi bi-person-badge" aria-hidden="true"></i>
+                <span class="texto-link">
+                    {% if config and config.idioma == 'en-US' %}Employees{% else %}Funcionários{% endif %}
+                </span>
+            </a>
+            <a href="{{ url_for('salvar_sensor') }}" class="nav-link">
+                <i class="bi bi-broadcast" aria-hidden="true"></i>
+                <span class="texto-link">
+                    {% if config and config.idioma == 'en-US' %}Sensors{% else %}Sensores{% endif %}
+                </span>
+            </a>
+
+            <li><a href="{{ url_for('teste') }}">teste</a></li>
+
+        </nav>
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main id="conteudo-principal" class="content-wrapper" tabindex="-1">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {% block conteudo %}
+        {% endblock %}
+    </main>
+
+    <!-- COMPONENTE DE ACESSIBILIDADE FLUTUANTE -->
+    <button id="btn-acessibilidade" aria-label="Abrir menu de acessibilidade" aria-expanded="false"
+        title="Menu de Acessibilidade">
+        <span aria-hidden="true">♿</span>
+    </button>
+
+    <div id="painel-acessibilidade" class="painel-escondido" role="region" aria-label="Ferramentas de acessibilidade">
+        <h3>{% if config and config.idioma == 'en-US' %}Accessibility{% else %}Acessibilidade{% endif %}</h3>
+        <button id="btn-aumentar-fonte" class="btn-acess-item">
+            <span aria-hidden="true">🔍+</span> {% if config and config.idioma == 'en-US' %}Increase Font{% else
+            %}Aumentar Fonte{% endif %}
+        </button>
+        <button id="btn-diminuir-fonte" class="btn-acess-item">
+            <span aria-hidden="true">🔍-</span> {% if config and config.idioma == 'en-US' %}Decrease Font{% else
+            %}Diminuir Fonte{% endif %}
+        </button>
+        <button id="btn-alto-contraste" class="btn-acess-item">
+            <span aria-hidden="true">🌓</span> {% if config and config.idioma == 'en-US' %}High Contrast{% else %}Alto
+            Contraste{% endif %}
+        </button>
+        <button id="btn-ler-hover" class="btn-acess-item">
+            <span aria-hidden="true">🔊</span> {% if config and config.idioma == 'en-US' %}Read on Hover{% else %}Ler ao
+            Passar o Mouse{% endif %}
+        </button>
+        <button id="btn-resetar" class="btn-acess-item">
+            <span aria-hidden="true">🔄</span> {% if config and config.idioma == 'en-US' %}Reset{% else %}Redefinir{%
+            endif %}
+        </button>
+    </div>
+
+    <!-- JAVASCRIPT DE ACESSIBILIDADE COM PERSISTÊNCIA -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnAcessibilidade = document.getElementById('btn-acessibilidade');
+            const painel = document.getElementById('painel-acessibilidade');
+            const btnLerHover = document.getElementById('btn-ler-hover');
+            const btnAltoContraste = document.getElementById('btn-alto-contraste');
+
+            let synth = window.speechSynthesis;
+            let leituraHoverAtiva = false;
+            let ultimoTextoLido = "";
+            let tamanhoFonteAtual = 100;
+            const idiomaAtual = "{{ config.idioma if config and config.idioma else 'pt-BR' }}";
+
+            const dicionarioEmojis = {
+                "🏠": "Ícone da Página Inicial",
+                "📤": "Ícone de Pedidos",
+                "👥": "Ícone de Clientes",
+                "🚚": "Ícone de Fornecedores",
+                "🏷️️": "Ícone de Produtos",
+                "🗃️": "Ícone de Estoque",
+                "👤": "Ícone de Funcionários",
+                "📡": "Ícone de Sensores",
+                "♿": "Ícone de Acessibilidade",
+                "📷": "Ícone de foto",
+                "🗑️": "Ícone de excluir"
+            };
+
+            // --- RESTAURAR CONFIGURAÇÕES DO LOCALSTORAGE ---
+            function carregarPreferencias() {
+                const fonteSalva = localStorage.getItem('acessibilidade_fonte');
+                if (fonteSalva) {
+                    tamanhoFonteAtual = parseInt(fonteSalva);
+                    document.documentElement.style.fontSize = `${tamanhoFonteAtual}%`;
+                }
+
+                const contrasteSalvo = localStorage.getItem('acessibilidade_contraste');
+                if (contrasteSalvo === 'true') {
+                    document.body.classList.add('alto-contraste');
+                }
+
+                const leituraSalva = localStorage.getItem('acessibilidade_leitura');
+                if (leituraSalva === 'true') {
+                    leituraHoverAtiva = true;
+                    document.body.classList.add('leitura-hover-ativa');
+                    btnLerHover.classList.add('ativo');
+                    btnLerHover.innerHTML = '<span aria-hidden="true">🔊</span> Leitura Hover [ON]';
+                }
+            }
+
+            carregarPreferencias();
+
+            // Abrir e Fechar Menu Flutuante
+            btnAcessibilidade.addEventListener('click', () => {
+                const estaAberto = painel.classList.toggle('painel-escondido');
+                btnAcessibilidade.setAttribute('aria-expanded', !estaAberto);
+            });
+
+            // Controle do Tamanho da Fonte
+            document.getElementById('btn-aumentar-fonte').addEventListener('click', () => {
+                if (tamanhoFonteAtual < 140) {
+                    tamanhoFonteAtual += 10;
+                    document.documentElement.style.fontSize = `${tamanhoFonteAtual}%`;
+                    localStorage.setItem('acessibilidade_fonte', tamanhoFonteAtual);
+                }
+            });
+
+            document.getElementById('btn-diminuir-fonte').addEventListener('click', () => {
+                if (tamanhoFonteAtual > 80) {
+                    tamanhoFonteAtual -= 10;
+                    document.documentElement.style.fontSize = `${tamanhoFonteAtual}%`;
+                    localStorage.setItem('acessibilidade_fonte', tamanhoFonteAtual);
+                }
+            });
+
+            // Alternar Alto Contraste
+            btnAltoContraste.addEventListener('click', () => {
+                const ativo = document.body.classList.toggle('alto-contraste');
+                localStorage.setItem('acessibilidade_contraste', ativo);
+            });
+
+            // Ativar / Desativar Leitura por Hover
+            btnLerHover.addEventListener('click', () => {
+                if (!('speechSynthesis' in window)) {
+                    alert(idiomaAtual === 'en-US' ? "Your browser does not support text-to-speech." : "Seu navegador não suporta a função de leitura em voz alta.");
+                    return;
+                }
+
+                leituraHoverAtiva = !leituraHoverAtiva;
+                document.body.classList.toggle('leitura-hover-ativa', leituraHoverAtiva);
+                localStorage.setItem('acessibilidade_leitura', leituraHoverAtiva);
+
+                if (leituraHoverAtiva) {
+                    btnLerHover.classList.add('ativo');
+                    btnLerHover.innerHTML = '<span aria-hidden="true">🔊</span> Leitura Hover [ON]';
+                    falarTexto(idiomaAtual === 'en-US' ? "Hover reading activated." : "Leitura ao passar o mouse ativada.");
+                } else {
+                    btnLerHover.classList.remove('ativo');
+                    btnLerHover.innerHTML = '<span aria-hidden="true">🔊</span> ' + (idiomaAtual === 'en-US' ? "Read on Hover" : "Ler ao Passar o Mouse");
+                    if (synth) synth.cancel();
+                    ultimoTextoLido = "";
+                }
+            });
+
+            // Leitura por Hover no Mover do Mouse
+            document.body.addEventListener('mouseover', (e) => {
+                if (!leituraHoverAtiva) return;
+
+                if (e.target.closest('#painel-acessibilidade') || e.target.closest('#btn-acessibilidade')) {
+                    return;
+                }
+
+                let elemento = e.target;
+                let textoExtraido = extrairTextoParaLeitura(elemento);
+
+                if (textoExtraido && textoExtraido !== ultimoTextoLido) {
+                    ultimoTextoLido = textoExtraido;
+                    falarTexto(textoExtraido);
+                }
+            });
+
+            function extrairTextoParaLeitura(el) {
+                const textoLimpo = el.innerText ? el.innerText.trim() : "";
+                if (dicionarioEmojis[textoLimpo]) {
+                    return dicionarioEmojis[textoLimpo];
+                }
+
+                let texto = el.getAttribute('aria-label') ||
+                    el.getAttribute('alt') ||
+                    el.getAttribute('title') ||
+                    el.innerText ||
+                    el.value;
+
+                if (!texto) return "";
+
+                Object.keys(dicionarioEmojis).forEach(emoji => {
+                    if (texto.includes(emoji)) {
+                        texto = texto.replace(emoji, dicionarioEmojis[emoji]);
+                    }
+                });
+
+                return texto.trim();
+            }
+
+            function falarTexto(texto) {
+                if (!synth) return;
+
+                synth.cancel();
+
+                const utterance = new SpeechSynthesisUtterance(texto);
+                utterance.lang = idiomaAtual === 'en-US' ? 'en-US' : 'pt-BR';
+                utterance.rate = 1.1;
+
+                synth.speak(utterance);
+            }
+
+            // REDEFINIR
+            document.getElementById('btn-resetar').addEventListener('click', () => {
+                localStorage.removeItem('acessibilidade_fonte');
+                localStorage.removeItem('acessibilidade_contraste');
+                localStorage.removeItem('acessibilidade_leitura');
+
+                tamanhoFonteAtual = 100;
+                document.documentElement.style.fontSize = '100%';
+                document.body.classList.remove('alto-contraste', 'leitura-hover-ativa');
+
+                leituraHoverAtiva = false;
+                btnLerHover.classList.remove('ativo');
+                btnLerHover.innerHTML = '<span aria-hidden="true">🔊</span> ' + (idiomaAtual === 'en-US' ? "Read on Hover" : "Ler ao Passar o Mouse");
+
+                if (synth) synth.cancel();
+                ultimoTextoLido = "";
+            });
+        });
+    </script>
+
+    <!-- NOTIFICAÇÕES -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const botao = document.getElementById("botao-notificacoes");
+            const painel = document.getElementById("painel-notificacoes");
+            const contador = document.getElementById("contador-notificacoes");
+            const lista = document.getElementById("lista-notificacoes");
+            const resumo = document.getElementById(
+                "texto-resumo-notificacoes"
+            );
+            const marcarTodas = document.getElementById(
+                "marcar-todas-notificacoes"
+            );
+
+            /* =====================================================
+            ÍCONES
+            ===================================================== */
+            function obterIcone(tipo) {
+                switch (tipo) {
+                    case "temperatura":
+                        return {
+                            icone: "🌡️",
+                            classe: "notificacao-temperatura"
+                        };
+                    case "estoque_baixo":
+                        return {
+                            icone: "⚠️",
+                            classe: "notificacao-estoque"
+                        };
+                    case "estoque_cheio":
+                        return {
+                            icone: "📦",
+                            classe: "notificacao-estoque"
+                        };
+                    case "pedido":
+                        return {
+                            icone: "🛒",
+                            classe: "notificacao-pedido"
+                        };
+                    case "monitoramento":
+                        return {
+                            icone: "📡",
+                            classe: "notificacao-monitoramento"
+                        };
+                    default:
+                        return {
+                            icone: "🔔",
+                            classe: "notificacao-sistema"
+                        };
+                }
+            }
+
+            /* =====================================================
+            CARREGAR NOTIFICAÇÕES
+            ===================================================== */
+            async function carregarNotificacoes() {
+                try {
+                    const resposta = await fetch(
+                        "/api/notificacoes"
+                    );
+                    if (!resposta.ok) {
+                        throw new Error(
+                            "Erro ao buscar notificações"
+                        );
+                    }
+                    const dados = await resposta.json();
+                    atualizarContador(
+                        dados.nao_lidas
+                    );
+                    renderizarNotificacoes(
+                        dados.notificacoes
+                    );
+                }
+                catch (erro) {
+                    console.error(
+                        "Erro nas notificações:",
+                        erro
+                    );
+                }
+            }
+
+            /* =====================================================
+            CONTADOR
+            ===================================================== */
+            function atualizarContador(total) {
+                if (total > 0) {
+                    contador.style.display = "flex";
+                    contador.textContent =
+                        total > 99 ? "99+" : total;
+                    botao.classList.add(
+                        "tem-notificacao"
+                    );
+                    resumo.textContent =
+                        total === 1
+                            ? "1 nova notificação"
+                            : `${total} novas notificações`;
+                }
+                else {
+                    contador.style.display = "none";
+                    botao.classList.remove(
+                        "tem-notificacao"
+                    );
+                    resumo.textContent =
+                        "Nenhuma nova notificação";
+                }
+            }
+
+            /* =====================================================
+            RENDERIZAR
+            ===================================================== */
+            function renderizarNotificacoes(
+                notificacoes
+            ) {
+                if (!notificacoes ||
+                    notificacoes.length === 0) {
+                    lista.innerHTML = `
+<div class="notificacoes-vazia">
+<div style="font-size:32px;">
+🔔
+</div>
+<div>
+Nenhuma notificação
+</div>
+</div>
+`;
+                    return;
+                }
+
+                lista.innerHTML = "";
+
+                notificacoes.forEach(
+                    function (notificacao) {
+                        const visual =
+                            obterIcone(
+                                notificacao.tipo
+                            );
+
+                        const item =
+                            document.createElement("div");
+                        item.className =
+                            "notificacao-item" +
+                            (
+                                !notificacao.lida
+                                    ? " nao-lida"
+                                    : ""
+                            );
+
+                        item.innerHTML = `
+<div
+class="notificacao-icone ${visual.classe}">
+${visual.icone}
+</div>
+<div
+class="notificacao-conteudo">
+<div
+class="notificacao-titulo">
+${escaparHTML(
+                            notificacao.titulo
+                        )}
+</div>
+<div
+class="notificacao-mensagem">
+${escaparHTML(
+                            notificacao.mensagem
+                        )}
+</div>
+<div
+class="notificacao-data">
+${notificacao.data_hora}
+</div>
+</div>
+`;
+
+                        item.addEventListener(
+                            "click",
+                            async function () {
+                                if (!notificacao.lida) {
+                                    await marcarComoLida(
+                                        notificacao.id
+                                    );
+                                }
+
+                                if (notificacao.link) {
+                                    window.location.href =
+                                        notificacao.link;
+                                }
+                            }
+                        );
+
+                        lista.appendChild(item);
+                    }
+                );
+            }
+
+            /* =====================================================
+            MARCAR UMA
+            ===================================================== */
+            async function marcarComoLida(id) {
+                try {
+                    await fetch(
+                        `/api/notificacoes/${id}/ler`,
+                        {
+                            method: "POST"
+                        }
+                    );
+                    carregarNotificacoes();
+                }
+                catch (erro) {
+                    console.error(
+                        "Erro ao marcar notificação:",
+                        erro
+                    );
+                }
+            }
+
+            /* =====================================================
+            MARCAR TODAS
+            ===================================================== */
+            marcarTodas.addEventListener(
+                "click",
+                async function () {
+                    try {
+                        await fetch(
+                            "/api/notificacoes/ler-todas",
+                            {
+                                method: "POST"
+                            }
+                        );
+                        carregarNotificacoes();
+                    }
+                    catch (erro) {
+                        console.error(
+                            "Erro ao marcar notificações:",
+                            erro
+                        );
+                    }
+                }
+            );
+
+            /* =====================================================
+            ABRIR / FECHAR
+            ===================================================== */
+            botao.addEventListener(
+                "click",
+                function (evento) {
+                    evento.stopPropagation();
+                    const aberto =
+                        painel.classList.contains(
+                            "aberto"
+                        );
+
+                    if (aberto) {
+                        painel.classList.remove(
+                            "aberto"
+                        );
+                        botao.setAttribute(
+                            "aria-expanded",
+                            "false"
+                        );
+                    }
+                    else {
+                        painel.classList.add(
+                            "aberto"
+                        );
+                        botao.setAttribute(
+                            "aria-expanded",
+                            "true"
+                        );
+                        carregarNotificacoes();
+                    }
+                }
+            );
+
+            /* =====================================================
+            CLICAR FORA
+            ===================================================== */
+            document.addEventListener(
+                "click",
+                function (evento) {
+                    if (
+                        !document
+                            .getElementById(
+                                "sistema-notificacoes"
+                            )
+                            .contains(evento.target)
+                    ) {
+                        painel.classList.remove(
+                            "aberto"
+                        );
+                        botao.setAttribute(
+                            "aria-expanded",
+                            "false"
+                        );
+                    }
+                }
+            );
+
+            /* =====================================================
+            SEGURANÇA CONTRA HTML
+            ===================================================== */
+            function escaparHTML(texto) {
+                const div =
+                    document.createElement("div");
+                div.textContent =
+                    texto ?? "";
+                return div.innerHTML;
+            }
+
+            /* =====================================================
+            PRIMEIRO CARREGAMENTO
+            ===================================================== */
+            carregarNotificacoes();
+
+            /* =====================================================
+            ATUALIZA AUTOMATICAMENTE
+            A CADA 10 SEGUNDOS
+            ===================================================== */
+            setInterval(
+                carregarNotificacoes,
+                10000
+            );
+        });
+    </script>
+
+</body>
+
+<!-- =====================================================
+     SINO DE NOTIFICAÇÕES FLOW TECH
+     ===================================================== -->
+
+<div id="sistema-notificacoes">
+
+    <button id="botao-notificacoes" type="button" aria-label="Abrir notificações" aria-expanded="false"
+        title="Notificações">
+
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+            <path d="M18 8C18 4.686 15.314 2 12 2C8.686 2 6 4.686 6 8C6 15 3 17 3 18H21C21 17 18 15 18 8Z"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+
+            <path d="M10 21H14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+
+        <span id="contador-notificacoes">0</span>
+
+    </button>
+
+
+    <div id="painel-notificacoes">
+
+        <div class="notificacoes-cabecalho">
+
+            <div>
+                <h3>Notificações</h3>
+                <span id="texto-resumo-notificacoes">
+                    Nenhuma nova
+                </span>
+            </div>
+
+            <button id="marcar-todas-notificacoes" type="button">
+
+                Marcar todas
+            </button>
+
+        </div>
+
+
+        <div id="lista-notificacoes">
+
+            <div class="notificacoes-carregando">
+                Carregando notificações...
+            </div>
+
+        </div>
+
+
+        <div class="notificacoes-rodape">
+
+            <a href="/api/sensor">
+                Ver monitoramento
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+</html>

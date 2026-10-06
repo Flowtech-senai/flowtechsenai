@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+<style>
+    .profile-avatar-container {
+        width: 150px;
+        height: 150px;
+        margin: 0 auto;
+    }
+
+    .profile-avatar-container img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-info-box {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 16px;
+        border: 1px solid #e9ecef;
+    }
+
+    .card-info-label {
+        font-size: 0.70rem;
+        font-weight: 700;
+        color: #6c757d;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .card-info-value {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #212529;
+    }
+</style>
+
+<!-- FORMULÁRIO PRINCIPAL COM O ATRIBUTO PARA ARQUIVOS -->
+<form action="/editar-perfil" method="POST" enctype="multipart/form-data">
+    <div class="container d-flex justify-content-center align-items-center min-vh-100 py-4">
+
+        <div class="card shadow-sm border-0 overflow-hidden"
+            style="max-width: 800px; width: 100%; border-radius: 12px;">
+
+            <!-- Topo Colorido Flow Tech -->
+            <div class="position-relative d-flex flex-column align-items-center justify-content-center"
+                style="height: 220px; background: linear-gradient(135deg, #65ffe3, #0dad95);">
+
+                <div class="profile-avatar-container">
+                    <!-- Mostra a foto que vem do banco pelo Python, ou a imagem padrão -->
+                    {% if usuario_foto and usuario_foto != 'imagens/sem-foto.png' %}
+                    <img src="{{ url_for('static', filename=usuario_foto) }}" alt="Foto do Funcionário"
+                        id="avatar-preview">
+                    {% else %}
+                    <img src="/static/sem_foto.jpg" alt="Sem Foto Padrão" id="avatar-preview">
+                    {% endif %}
+                </div>
+
+                <div class="d-flex align-items-center"
+                    style="position: absolute; bottom: 15px; right: 15px; gap: 8px; z-index: 10;">
+
+                    <!-- input invisível -->
+                    <input type="file" name="foto" id="foto" accept="image/png, image/jpeg, image/jpg"
+                        style="display: none;">
+
+                    <!-- botão da câmera -->
+                    <label for="foto" class="btn btn-success rounded-pill btn-sm"
+                        style="font-size: 0.70rem; cursor: pointer; margin: 0; padding: 5px 10px;">
+                        📷
+                    </label>
+
+                    <!-- botão de excluir foto -->
+                    {% if usuario_foto and usuario_foto != 'imagens/sem_foto.jpg' %}
+                    <a href="/remover-foto" class="btn btn-danger rounded-pill btn-sm"
+                        style="font-size: 0.70rem; cursor: pointer; margin: 0; padding: 5px 10px;"
+                        onclick="return confirm('Tem certeza que deseja excluir sua foto de perfil?');">
+                        🗑️
+                    </a>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            {% if funcionario %}
+            <div class="row g-3 mb-4">
+                <!-- CARD 1: NOME COMPLETO -->
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded shadow-sm border h-100">
+                        <span class="d-block text-uppercase text-muted fw-bold mb-1"
+                            style="font-size: 0.7rem; letter-spacing: 0.5px;">NOME COMPLETO</span>
+                        <!-- Exibe o nome do usuário vindo do banco -->
+                        <strong class="text-dark fs-6">{{ funcionario.nome if funcionario.nome else 'Não informado'
+                            }}</strong>
+                    </div>
+                </div>
+
+                <!-- CARD 2: CARGO -->
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded shadow-sm border h-100">
+                        <span class="d-block text-uppercase text-muted fw-bold mb-1"
+                            style="font-size: 0.7rem; letter-spacing: 0.5px;">CARGO</span>
+                        <!-- Exibe o cargo do usuário vindo do banco -->
+                        <strong class="text-dark fs-6">{{ funcionario.cargo|capitalize if funcionario.cargo else 'Sem
+                            Cargo' }}</strong>
+                    </div>
+                </div>
+
+                <!-- CARD 3: STATUS -->
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded shadow-sm border h-100">
+                        <span class="d-block text-uppercase text-muted fw-bold mb-1"
+                            style="font-size: 0.7rem; letter-spacing: 0.5px;">STATUS</span>
+                        <strong class="text-success fs-6">Conta ativa</strong>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</form>
+{% endblock %}

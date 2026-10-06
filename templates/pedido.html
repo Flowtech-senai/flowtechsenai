@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+
+<style>
+    body {
+        background: #cdccccc0 !important;
+        color: #ffffff !important;
+    }
+</style>
+
+<div class="container py-5">
+
+    <!-- CABEÇALHO DA TELA COM BOTÃO DE CADASTRO -->
+    <div class="d-flex justify-content-between align-items-center mb-4"
+        style="color: #007E83; font-weight: 700; letter-spacing: 1px;">
+        <h2 id="list-ped" class="mb-0"><i class="bi bi-journal-text"></i> Histórico de Pedidos / Movimentações</h2>
+        <!-- BOTÃO PARA IR PARA A TELA DE ESCOLHA (ENTRADA/SAÍDA) -->
+        <a href="{{ url_for('menu_pedidos') }}" class="btn btn-primary btn-lg">
+            <i class="bi bi-plus-circle me-2"></i> Nova Movimentação
+        </a>
+    </div>
+
+    <!-- MENSAGENS DE FLASH (ALERTA DE EXCLUSÃO OU EDIÇÃO) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismissible="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <!-- TABELA DE HISTÓRICO -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0 align-middle">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>ID Pedido</th>
+                            <th>Data e Hora</th>
+                            <th>Preço Unitário</th>
+                            <th>Quantidade</th>
+                            <th>Total Venda</th>
+                            <th>Fornecedor / Destinatário</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pedido in itempedido_saida %}
+                        <tr>
+                            <!-- Tratamento flexível caso o banco retorne Objeto ou Dicionário -->
+                            {% if pedido is mapping %}
+                            <td>{{ pedido.get('pedido_id') or pedido.get('id', '') }}</td>
+                            <td>{{ pedido.get('data_hora', '') }}</td>
+                            <td>R$ {{ pedido.get('preco_unitario', '0.00') }}</td>
+                            <td>{{ pedido.get('quantidade', 0) }}</td>
+                            <td>R$ {{ pedido.get('preco_venda', '0.00') }}</td>
+                            <td>{{ pedido.get('fornecedor', '') or pedido.get('nome', 'Não Informado') }}</td>
+                            <td class="text-center">
+                                <a href="{{ url_for('editar_pedido', id=pedido.get('pedido_id') or pedido.get('id')) }}"
+                                    class="btn btn-sm btn-warning me-1">
+                                    <i class="bi bi-pencil-square"></i> Editar
+                                </a>
+                                <a href="{{ url_for('excluir_pedido', id=pedido.get('pedido_id') or pedido.get('id')) }}"
+                                    class="btn btn-sm btn-danger"
+                                    onclik="return confirm('Deseja realmente excluir este registro?')">
+                                    <i class="bi bi-trash"></i> Excluir
+                                </a>
+                            </td>
+                            {% else %}
+                            <td>{{ pedido.pedido_id or pedido.id }}</td>
+                            <td>{{ pedido.data_hora }}</td>
+                            <td>R$ {{ pedido.preco_unitario }}</td>
+                            <td>{{ pedido.quantidade }}</td>
+                            <td>R$ {{ pedido.preco_venda }}</td>
+                            <td>{{ pedido.fornecedor }}</td>
+                            <td class="text-center">
+                                <a href="{{ url_for('editar_pedido', id=pedido.pedido_id or pedido.id) }}"
+                                    class="btn btn-sm btn-warning me-1">
+                                    <i class="bi bi-pencil-square"></i> Editar
+                                </a>
+                                <a href="{{ url_for('excluir_pedido', id=pedido.pedido_id or pedido.id) }}"
+                                    class="btn btn-sm btn-danger"
+                                    onclick="return confirm('Deseja realmente excluir este registro?')">
+                                    <i class="bi bi-outline-danger px-4 rounded-pill shadow-sm fw-bold"></i> Excluir
+                                </a>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-4 d-block mb-2"></i> Nenhum pedido ou movimentação registrada
+                                no histórico.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

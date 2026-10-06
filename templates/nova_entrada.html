@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% block conteudo %}
+
+<style>
+    body {
+        background: #cdccccc0 !important;
+        color: #ffffff !important;
+    }
+</style>
+
+<div class="container mt-3">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+</div>
+
+
+<div class="container py-5">
+    <h1 class="main-title mb-5" style="color: #007E83; font-weight: 700; letter-spacing: 1px; text-align: center;">
+        Nova entrada de pedido</h1>
+
+    <form action="/salvar_movimentacao_entrada" method="POST">
+        <!-- pedido_entrada -->
+        <div class="card mb-4  p-4 shadow-sm">
+            <h6 class="text-muted mb-3">Nova Entrada </h6>
+            <div class="row g-3">
+                <!-- div com os campos necessários para realizar a entrada de um produto -->
+                <div class="col-md-4">
+                    <label class="form-label">Fornecedor:</label>
+                    <select name="fornecedor_id" class="form-select bg-light" required>
+                        <option value="">Selecione o Fornecedor...</option>
+                        {% for f in fornecedores %}
+                        <!-- apenas fornecedores cadastrdos podem estar nesse campo -->
+                        <option value="{{ f.fornecedor_id or f.id }}">{{ f.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Data de Entrada:</label>
+                    <input type="date" name="data" class="form-control bg-light" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Status do Pedido:</label>
+                    <select name="status_pedido" class="form-select bg-light">
+                        <option value="Pendente">Pendente</option>
+                        <option value="Entregue">Entregue</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Descrição:</label>
+                    <textarea name="descricao" class="form-control bg-light" rows="2"
+                        placeholder="Digite o motivo da entrada..."></textarea>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Funcionário Responsável:</label>
+                    <select name="funcionario_id" class="form-select bg-light" required>
+                        <option value="">Selecione o Funcionário...</option>
+                        {% for func in funcionarios %}
+                        <!-- busca o funcionário logado no site e retorn o nome no campos 'responsável' -->
+                        <option value="{{ func.id or func.funcionario_id }}">{{ func.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Lote:</label>
+                    <input type="text" step="0.01" name="lote" class="form-control bg-light" value="lote" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label text-muted small">Código RFID do Lote:</label>
+                    <input type="text" name="rfid" id="input-rfid" class="form-control bg-light" required
+                        placeholder="Aproxime a tag ou digite">
+                </div>
+
+            </div>
+        </div>
+
+
+
+        <!-- Formulário do local -->
+        <div class="card mb-4 p-4 shadow-sm">
+            <h6 class="text-muted mb-3">Destino no estoque</h6>
+
+            <div class="row g-2 align-items-end mt-3">
+                <div class="col-md-3">
+                    <label class="form-label text-muted small" for="rua_cor">Cor da Rua:</label>
+                    <input type="text" name="rua_cor" id="input-rua_cor" class="form-control bg-light" required
+                        placeholder="Ex: Azul">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label text-muted small" for="prateleira_numero">Número da Prateleira:</label>
+                    <input type="number" name="prateleira_numero" id="input-prateleira_numero"
+                        class="form-control bg-light" required step="1" placeholder="Ex: 3">
+                </div>
+            </div>
+        </div>
+
+
+        <!-- item_pedido_entrada (Itens da entrada) -->
+        <div class="card mb-4 p-4 shadow-sm">
+            <h6 class="text-muted mb-3">Itens da Entrada</h6>
+
+            <!-- Formulário inferior para adicionar itens temporários à tabela -->
+            <div class="row g-2 align-items-end mt-3">
+                <div class="col-md">
+                    <label class="form-label text-muted small">Selecione o Medicamento</label>
+                    <select name="produto_id" id="select-medicamento" class="form-select bg-light">
+                        <option value="">Selecione...</option>
+                        {% for p in produtos %}
+                        <option value="{{ p.produto_id or p.id }}">{{ p.nome }} (Estoque: {{ p.quantidade }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md">
+                    <label class="form-label text-muted small">Qtd:</label>
+                    <input type="number" name="quantidade" id="input-qtd" class="form-control bg-light" min="1">
+                </div>
+                <div class="col-md">
+                    <label class="form-label text-muted small">Preço de custo:</label>
+                    <input type="number" name="preco_custo" id="input-preco" class="form-control bg-light" step="0.01">
+                </div>
+            </div>
+
+
+            <!-- tabela de registro das movimentações -->
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>ID Entrada</th>
+                            <th>Status</th>
+                            <th>Funcionário (ID)</th>
+                            <th>Local ID</th>
+                            <th>Fornecedor ID</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pe in pedido_entrada %}
+                        <tr>
+                            <td>{{ pe['pedido_entrada_id'] or pe['id'] }}</td>
+                            <td>{{ pe['status_pedido'] }}</td>
+                            <td>{{ pe['funcionario_id'] }}</td>
+                            <td>{{ pe['local_id'] }}</td>
+                            <td>{{ pe['fornecedor_id'] }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-3">Nenhum medicamento adicionado a esta
+                                entrada.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Botões de Ação Inferiores -->
+        <div class="text-end">
+            <a href="{{ url_for('nova_entrada') }}"
+                class="btn btn-outline-danger px-3 rounded-pill shadow-sm fw-bold">Cancelar</a>
+            <button type="button" class="btn btn-outline-secondary me-2 rounded-pill shadow-sm fw-bold">Salvar
+                Rascunho</button>
+            <button type="submit" class="btn btn-success px-4 rounded-pill shadow-sm fw-bold">Finalizar Entrada</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

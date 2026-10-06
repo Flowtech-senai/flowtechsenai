@@ -1,0 +1,806 @@
+{% extends "base.html" %}
+
+{% block conteudo %}
+<style>
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 25px;
+    }
+
+
+    .badges-container {
+        display: flex;
+        gap: 12px;
+    }
+
+    .badge {
+        background: #ffffff;
+        padding: 8px 16px;
+        border-radius: 10px;
+        font-size: 0.88rem;
+        color: #334155;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .badge-atencao {
+        background: #fef08a;
+        color: #713f12;
+        padding: 2px 7px;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+
+    .badge-critico {
+        background: #ef4444;
+        color: #ffffff;
+        padding: 2px 7px;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+
+    .grid-sensores {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 16px;
+    }
+
+    .card {
+        background: #ffffff;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #e2e8f0;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    .topo-card {
+        height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .topo-card svg {
+        width: 48px;
+        height: 48px;
+        stroke: #ffffff;
+        fill: none;
+        stroke-width: 1.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    .bg-temperatura {
+        background-color: #134e5e;
+    }
+
+    .bg-umidade {
+        background-color: #1e5a6a;
+    }
+
+    .bg-estoque {
+        background-color: #256b7b;
+    }
+
+    .bg-portas {
+        background-color: #2b7b8c;
+    }
+
+    .bg-rfid {
+        background-color: #2d8c9d;
+    }
+
+    .corpo-card {
+        padding: 16px 12px 14px 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        flex: 1;
+        justify-content: space-between;
+    }
+
+    .corpo-card h2 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1e293b;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-bottom: 4px;
+    }
+
+    .corpo-card p {
+        font-size: 0.78rem;
+        color: #475569;
+        line-height: 1.25;
+        min-height: 30px;
+        margin-bottom: 12px;
+    }
+
+    .pill-normal {
+        background-color: #dcfce7;
+        color: #166534;
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 3px 12px;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 16px;
+    }
+
+    .pill-normal::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        background-color: #22c55e;
+        border-radius: 50%;
+    }
+
+    .btn-ver {
+        background-color: #52606d;
+        color: #ffffff;
+        border: none;
+        width: 100%;
+        padding: 9px 0;
+        border-radius: 6px;
+        font-weight: 500;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .btn-ver:hover {
+        background-color: #3e4852;
+    }
+
+    .tela-interna {
+        display: none;
+    }
+
+    .tela-interna.ativa {
+        display: block;
+    }
+
+    .topo-interna {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .btn-voltar {
+        background-color: #ffffff;
+        border: 1px solid #cbd5e1;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        color: #334155;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-voltar:hover {
+        border-color: #b6bfcb;
+        color: #273344;
+    }
+
+    .btn-novo-sensor {
+        background-color: #1a4f60;
+        color: white;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .btn-novo-sensor:hover {
+        background-color: #103744;
+    }
+
+    .filtros-area {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .filtros-area input,
+    .filtros-area select {
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        background: white;
+        outline: none;
+        font-size: 0.9rem;
+    }
+
+    .filtros-area input {
+        flex: 1;
+    }
+
+    .lista-sensores-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 16px;
+    }
+
+    .card-detalhe {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .card-detalhe-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .card-detalhe-top h3 {
+        font-size: 1rem;
+        color: #0f172a;
+    }
+
+    .tag-id {
+        font-size: 0.75rem;
+        color: #64748b;
+        font-weight: 600;
+    }
+
+    .box-leitura {
+        background: #f8fafc;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1px solid #f1f5f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .box-leitura span {
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+
+    .box-leitura strong {
+        font-size: 1.1rem;
+        color: #0f172a;
+    }
+
+    .acoes-card {
+        display: flex;
+        gap: 8px;
+        margin-top: 4px;
+    }
+
+    .btn-acao-card {
+        flex: 1;
+        padding: 6px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        background: white;
+        cursor: pointer;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .btn-acao-card.excluir {
+        color: #ef4444;
+        border-color: #fca5a5;
+    }
+
+    /* MODAL DE CADASTRO */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal.ativo {
+        display: flex;
+    }
+
+    .modal-corpo {
+        background: white;
+        padding: 24px;
+        border-radius: 12px;
+        width: 100%;
+        max-width: 420px;
+    }
+
+    .campo {
+        margin-bottom: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .campo label {
+        font-size: 0.8rem;
+        color: #64748b;
+        font-weight: 600;
+    }
+
+    .campo input,
+    .campo select {
+        padding: 8px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+    }
+</style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- TELA PRINCIPAL (DASHBOARD) -->
+        <section id="tela-home">
+            <div class="header">
+                <div class="titulo">
+                    <h1 style="color: #007E83; font-weight: 700; letter-spacing: 1px;">Sensores</h1>
+                    <p class=" text-muted text-center">
+                    </p>Monitoramento do galpão em tempo real</p>
+                </div>
+                <div class="badges-container">
+                    <div class="badge">Sensores ativos: <strong id="kpi-home-ativos"></strong></div>
+                </div>
+            </div>
+
+            <div class="grid-sensores">
+                <!-- TEMPERATURA -->
+                <div class="card" onclick="abrirTelaCategoria('temperatura')">
+                    <div class="topo-card bg-temperatura">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="corpo-card">
+                        <div>
+                            <h2>TEMPERATURA</h2>
+                            <p>Temperatura ambiente e câmara fria</p>
+                            <div class="pill-normal">Normal</div>
+                        </div>
+                        <button class="btn-ver">Ver sensores</button>
+                    </div>
+                </div>
+
+                <!-- UMIDADE -->
+                <div class="card" onclick="abrirTelaCategoria('umidade')">
+                    <div class="topo-card bg-umidade">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="corpo-card">
+                        <div>
+                            <h2>UMIDADE</h2>
+                            <p>Umidade ambiente e câmara fria</p>
+                            <div class="pill-normal">Normal</div>
+                        </div>
+                        <button class="btn-ver">Ver sensores</button>
+                    </div>
+                </div>
+
+                <!-- ESTOQUE -->
+                <div class="card" onclick="abrirTelaCategoria('estoque')">
+                    <div class="topo-card bg-estoque">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                            </path>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                        </svg>
+                    </div>
+                    <div class="corpo-card">
+                        <div>
+                            <h2>ESTOQUE</h2>
+                            <p>Presença de produtos e peso</p>
+                            <div class="pill-normal">Normal</div>
+                        </div>
+                        <button class="btn-ver">Ver sensores</button>
+                    </div>
+                </div>
+
+                <!-- PORTAS -->
+                <div class="card" onclick="abrirTelaCategoria('portas')">
+                    <div class="topo-card bg-portas">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M3 21h18M6 21V3h12v18"></path>
+                            <circle cx="15" cy="12" r="1"></circle>
+                        </svg>
+                    </div>
+                    <div class="corpo-card">
+                        <div>
+                            <h2>PORTAS</h2>
+                            <p>Abertura/fechamento e acesso</p>
+                            <div class="pill-normal">Normal</div>
+                        </div>
+                        <button class="btn-ver">Ver sensores</button>
+                    </div>
+                </div>
+
+                <!-- RFID -->
+                <div class="card" onclick="abrirTelaCategoria('rfid')">
+                    <div class="topo-card bg-rfid">
+                        <svg viewBox="0 0 24 24">
+                            <rect x="5" y="7" width="14" height="10" rx="2"></rect>
+                            <path d="M12 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"></path>
+                            <path d="M16 8a5 5 0 0 1 0 8"></path>
+                        </svg>
+                    </div>
+                    <div class="corpo-card">
+                        <div>
+                            <h2>RFID</h2>
+                            <p>Identificação e localização dos produtos</p>
+                            <div class="pill-normal">Normal</div>
+                        </div>
+                        <button class="btn-ver">Ver sensores</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TELA INTERNA (ABRE AO CLICAR EM UM CARD) -->
+        <section id="tela-interna" class="tela-interna">
+            <div class="topo-interna">
+                <button class="btn-voltar" onclick="voltarHome()">← Voltar ao painel</button>
+                <h2 id="titulo-pagina-interna">Sensores</h2>
+                <button class="btn-novo-sensor" onclick="abrirModal()">+ Cadastrar Sensor</button>
+            </div>
+
+            <div class="filtros-area">
+                <input type="text" id="busca-input" placeholder="Pesquisar sensor..." oninput="renderizarLista()">
+                <select id="setor-select" onchange="renderizarLista()">
+                    <option value="">Todos os setores</option>
+                    <option value="Galpão A">Galpão A</option>
+                    <option value="Câmara Fria">Câmara Fria</option>
+                    <option value="Docas">Docas</option>
+                </select>
+            </div>
+
+            <div class="lista-sensores-grid" id="container-sensores-lista"></div>
+        </section>
+
+    </div>
+
+    <!-- MODAL DE CADASTRO / EDIÇÃO -->
+    <div class="modal" id="modal-form">
+        <div class="modal-corpo">
+            <h3 id="modal-titulo" style="margin-bottom: 12px;">Cadastrar Sensor</h3>
+            <form id="form-sensor">
+
+                <input type="hidden" id="sensor-id" name="sensor_id">
+                <div class="campo">
+                    <label>Nome do Sensor</label>
+                    <input type="text" id="sensor_nome" name="sensor_nome" required
+                        placeholder="Ex: Sensor de Temperatura A1">
+                </div>
+                <div class="campo">
+                    <label>Tipo do Sensor</label>
+                    <input type="text" id="sensor-tipo" name="sensor_tipo" required
+                        placeholder="Ex: Temperatura, Umidade...">
+                </div>
+                <div class="campo">
+                    <label>Código ID</label>
+                    <input type="text" id="sensor-codigo" name="sensor_codigo" required placeholder="Ex: TMP-001">
+                </div>
+                <div class="campo">
+                    <label>Setor / Local</label>
+                    <select id="sensor-setor" name="sensor_setor" required>
+                        <option value="Galpão A">Galpão A</option>
+                        <option value="Câmara Fria">Câmara Fria</option>
+                        <option value="Docas">Docas</option>
+                    </select>
+                </div>
+                <div class="campo">
+                    <label>Leitura Atual</label>
+                    <input type="text" id="sensor-valor" name="sensor_valor" required placeholder="apenas números">
+                </div>
+
+                <div id="mensagem-feedback"
+                    style="display: none; margin-top: 15px; padding: 10px; border-radius: 4px; font-weight: bold;">
+                </div>
+
+                <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;">
+                    <button type="button" class="btn-acao-card" onclick="fecharModal()">Cancelar</button>
+                    <button type="submit" class="btn-novo-sensor"
+                        onclick="document.getElementById('sensor-tipo').value = categoriaAtiva;">Salvar</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE CADASTRO / EDIÇÃO -->
+    <div class="modal" id="modal-form">
+        <div class="modal-corpo">
+            <h3 id="modal-titulo" style="margin-bottom: 12px;">Cadastrar Sensor</h3>
+
+            <!-- O formulário envia de forma nativa para a rota do Python -->
+            <form id="form-sensor" action="/api/sensor" method="POST">
+
+                <input type="hidden" id="sensor-id" name="sensor_id">
+
+                <input type="hidden" id="sensor-tipo" name="sensor_tipo">
+
+                <div class="campo">
+                    <label>Nome do Sensor</label>
+                    <input type="text" id="sensor_nome" name="sensor_nome" required
+                        placeholder="Ex: Sensor de Temperatura A1">
+                </div>
+                <div class="campo">
+                    <label>Código ID</label>
+                    <input type="text" id="sensor-codigo" name="sensor_codigo" required placeholder="Ex: TMP-001">
+                </div>
+                <div class="campo">
+                    <label>Setor / Local</label>
+                    <select id="sensor-setor" name="sensor_setor" required>
+                        <option value="Galpão A">Galpão A</option>
+                        <option value="Câmara Fria">Câmara Fria</option>
+                        <option value="Docas">Docas</option>
+                    </select>
+                </div>
+                <div class="campo">
+                    <label>Leitura Atual</label>
+                    <input type="text" id="sensor-valor" name="sensor_valor" required
+                        placeholder="Ex: 22.5 °C, 55%, Fechada...">
+                </div>
+                <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;">
+                    <button type="button" class="btn-acao-card" onclick="fecharModal()">Cancelar</button>
+                    <button type="submit" class="btn-novo-sensor">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="dados-sensores-json" style="display: none;">
+        [
+        {% for sensor in sensores %}
+        {
+        "id": {{ sensor.id }},
+        "categoria": "{{ sensor.sensor_tipo }}",
+        "nome": "{{ sensor.sensor_nome }}",
+        "codigo": "{{ sensor.sensor_codigo }}",
+        "setor": "{{ sensor.sensor_setor }}",
+        "valor": "{{ sensor.valor }}"
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+        ]
+    </div>
+
+
+    <script>
+        let sensoresDoBanco = JSON.parse('{{ sensores|tojson|safe }}');
+
+        let sensores = sensoresDoBanco.map(s => ({
+            id: s.id,
+            categoria: s.sensor_tipo,
+            nome: s.sensor_nome,
+            codigo: s.sensor_codigo,
+            setor: s.sensor_setor,
+            valor: s.valor
+        }));
+
+        document.getElementById('kpi-home-ativos').innerText = sensores.length;
+
+        let categoriaAtiva = '';
+
+        function abrirTelaCategoria(cat) {
+            categoriaAtiva = cat;
+            document.getElementById('tela-home').style.display = 'none';
+            document.getElementById('tela-interna').classList.add('ativa');
+
+            const titulos = {
+                temperatura: 'Sensores de Temperatura',
+                umidade: 'Sensores de Umidade',
+                estoque: 'Sensores de Estoque',
+                portas: 'Sensores de Portas',
+                rfid: 'Sensores RFID'
+            };
+
+            document.getElementById('titulo-pagina-interna').innerText = titulos[cat];
+            renderizarLista();
+        }
+
+        function voltarHome() {
+            document.getElementById('tela-interna').classList.remove('ativa');
+            document.getElementById('tela-home').style.display = 'block';
+            document.getElementById('kpi-home-ativos').innerText = sensores.length;
+        }
+
+        function renderizarLista() {
+            const container = document.getElementById('container-sensores-lista');
+            container.innerHTML = '';
+
+            const busca = document.getElementById('busca-input').value.toLowerCase();
+            const setor = document.getElementById('setor-select').value;
+
+            const filtrados = sensores.filter(s => {
+                const bateCategoria = s.categoria === categoriaAtiva;
+                const bateBusca = s.nome.toLowerCase().includes(busca) || s.codigo.toLowerCase().includes(busca);
+                const bateSetor = setor === '' || s.setor === setor;
+                return bateCategoria && bateBusca && bateSetor;
+            });
+
+            if (filtrados.length === 0) {
+                container.innerHTML = '<p style="color: #64748b;">Nenhum sensor cadastrado para esta categoria.</p>';
+                return;
+            }
+
+            filtrados.forEach(s => {
+                const card = document.createElement('div');
+                card.className = 'card-detalhe';
+                card.innerHTML = `
+                <div class="card-detalhe-top">
+                    <div>
+                        <h3>${s.nome}</h3>
+                        <span class="tag-id">Código ID: ${s.codigo}</span>
+                    </div>
+                    <span class="pill-normal" style="margin: 0;">Normal</span>
+                </div>
+                <div style="font-size: 0.8rem; color: #64748b;">Local: <strong>${s.setor}</strong></div>
+                <div class="box-leitura">
+                    <span>Leitura atual:</span>
+                    <strong>${s.valor}</strong>
+                </div>
+                <div class="acoes-card">
+                    <button class="btn-acao-card" onclick="editarSensor(${s.id})">Editar</button>
+                    <button class="btn-acao-card excluir" onclick="excluirSensor(${s.id})">Excluir</button>
+                </div>
+            `;
+                container.appendChild(card);
+            });
+        }
+
+        function abrirModal(id = null) {
+            const form = document.getElementById('form-sensor');
+            const feedbackDiv = document.getElementById('mensagem-feedback');
+            if (feedbackDiv) feedbackDiv.style.display = 'none';
+
+            if (!id) {
+                form.action = "/api/sensor";
+                document.getElementById('sensor-id').value = '';
+                document.getElementById('sensor_nome').value = '';
+                document.getElementById('sensor-codigo').value = '';
+                document.getElementById('sensor-valor').value = '';
+                document.getElementById('sensor-tipo').value = '';
+                document.getElementById('sensor-setor').value = 'Galpão A';
+            } else {
+                form.action = "/api/sensor/atualizar";
+            }
+
+            const campoTipo = document.getElementById('sensor-tipo');
+            if (campoTipo) {
+                campoTipo.value = categoriaAtiva;
+            }
+
+            document.getElementById('modal-titulo').innerText = id ? 'Editar Sensor' : 'Cadastrar Sensor';
+            document.getElementById('modal-form').classList.add('ativo');
+        }
+
+        function fecharModal() {
+            document.getElementById('modal-form').classList.remove('ativo');
+        }
+
+        function editarSensor(id) {
+            const s = sensores.find(item => item.id === id);
+            if (s) {
+                document.getElementById('sensor-id').value = s.id;
+                document.getElementById('sensor_nome').value = s.nome;
+                document.getElementById('sensor-codigo').value = s.codigo;
+                document.getElementById('sensor-tipo').value = s.categoria;
+                document.getElementById('sensor-setor').value = s.setor;
+                document.getElementById('sensor-valor').value = s.valor;
+                abrirModal(id);
+            }
+        }
+
+        function excluirSensor(id) {
+            if (confirm('Tem certeza que deseja excluir este sensor definitivamente do banco de dados?')) {
+                window.location.href = `/api/sensor/excluir/${id}`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('form-sensor');
+            if (!form) return;
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                let feedbackDiv = document.getElementById('mensagem-feedback');
+                if (!feedbackDiv) {
+                    feedbackDiv = document.createElement('div');
+                    feedbackDiv.id = 'mensagem-feedback';
+                    feedbackDiv.style.cssText = 'margin-top: 15px; padding: 12px; border-radius: 4px; font-weight: bold; text-align: center;';
+                    form.insertBefore(feedbackDiv, form.lastElementChild);
+                }
+
+                feedbackDiv.style.display = 'none';
+
+                const formData = new URLSearchParams(new FormData(form));
+                const urlDestino = form.action || '/api/sensor';
+
+                try {
+                    const response = await fetch(urlDestino, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        feedbackDiv.style.backgroundColor = '#d4edda';
+                        feedbackDiv.style.color = '#155724';
+                        feedbackDiv.style.border = '1px solid #c3e6cb';
+                        feedbackDiv.innerText = "Operação realizada com sucesso!";
+                        feedbackDiv.style.display = 'block';
+
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+
+                    } else {
+                        const textoErro = await response.text();
+
+                        feedbackDiv.style.backgroundColor = '#f8d7da';
+                        feedbackDiv.style.color = '#721c24';
+                        feedbackDiv.style.border = '1px solid #f5c6cb';
+
+                        // Trata o texto feio e simplifica a mensagem na tela
+                        if (textoErro.includes("já está cadastrado") || textoErro.includes("u00e1 cadastrado")) {
+                            feedbackDiv.innerText = "Erro: sensor já cadastrado";
+                        } else if (textoErro.includes("obrigatórios") || textoErro.includes("preenchidos")) {
+                            feedbackDiv.innerText = "Erro: todos os campos são obrigatórios";
+                        } else if (textoErro.includes("incorretamente") || textoErro.includes("números")) {
+                            feedbackDiv.innerText = "Erro: campo preenchido incorretamente";
+                        } else {
+                            feedbackDiv.innerText = "Erro ao processar requisição.";
+                        }
+
+                        feedbackDiv.style.display = 'block';
+                    }
+
+                } catch (error) {
+                    feedbackDiv.style.backgroundColor = '#f8d7da';
+                    feedbackDiv.style.color = '#721c24';
+                    feedbackDiv.innerText = "Erro crítico: Não foi possível conectar ao servidor.";
+                    feedbackDiv.style.display = 'block';
+                }
+            });
+        });
+    </script>
+
+
+
+    {% endblock %}

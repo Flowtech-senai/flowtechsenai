@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flow Tech - Página Não Encontrada</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #00574c5f;
+            color: #013145;
+        }
+
+        .error-page {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .error-content {
+            position: relative;
+            z-index: 2;
+            max-width: 650px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .error-logo {
+            width: 180px;
+            height: auto;
+            margin-bottom: 30px;
+            filter: drop-shadow(0 0 15px rgba(0, 231, 252, 0.25));
+        }
+
+        .error-number {
+            font-size: 150px;
+            font-weight: 800;
+            line-height: 0.9;
+            color: #013145;
+            margin-bottom: 25px;
+        }
+
+        .error-content h1 {
+            font-size: 36px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #000000;
+        }
+
+        .error-content p {
+            max-width: 550px;
+            font-size: 17px;
+            line-height: 1.7;
+            color: #000000b1;
+            margin-bottom: 30px;
+        }
+
+        .btn-voltar {
+            display: inline-block;
+            padding: 14px 32px;
+            background-color: rgb(0, 83, 91);
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 25px;
+            transition: 0.3s ease;
+        }
+
+        .btn-voltar:hover {
+            background-color: rgb(0, 62, 67);
+            color: #ffffff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="error-page">
+
+        <div class="error-content">
+            <img src="/static/logosf-Photoroom.png" alt="Logo Flow Tech" class="error-logo">
+
+            <div class="error-number">404</div>
+
+            <h1>Página Não Encontrada</h1>
+            <p>O link que você tentou acessar pode estar quebrado, digitado incorretamente ou a página saiu do ar
+                temporariamente.</p>
+
+            <a href="{{ url_for('dashboard') }}" class="btn-voltar">
+                <i class="bi bi-arrow-left me-2"></i>Voltar para o Início
+            </a>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

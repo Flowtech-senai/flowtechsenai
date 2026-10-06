@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+<div class="container" style="max-width: 900px;">
+
+    <!-- Título Principal -->
+    <h1 class="main-title mb-5" style="color: #007E83; font-weight: 700; letter-spacing: 1px; text-align: center;">
+        Cadastro de Produtos</h1>
+    <div class="card-padrao-flow">
+
+        <div class="card-header" style="background-color: #007E83; padding: 10px; color:#ffffff; font-weight: bold;">
+            <i class="bi bi-plus-circle me-2 --primary-color"></i> NOVO CADASTRO
+        </div>
+
+        <div class="card-body">
+            <form action="{{ url_for('salvar_produto') }}" method="POST" enctype="multipart/form-data">
+
+                <!-- Nome e Categoria -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="nome">Nome:</label>
+                        <input type="text" id="nome" name="nome" class="form-control"
+                            value="{{ produto.nome if produto else '' }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="categoria">Categoria:</label>
+                        <input type="text" id="categoria" name="categoria" class="form-control"
+                            value="{{ produto.categoria if produto else '' }}" required>
+                    </div>
+                </div>
+
+                <!-- Tipo de Produto e Estoque Mínimo -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="tipo_produto">Tipo de Produto:</label>
+                        <select class="form-select w-100" name="tipo_produto" id="tipo_produto">
+                            <option value="" {% if not produto %} selected {% endif %}>Selecione uma opção</option>
+                            <option value="Comprimido" {% if produto and produto.tipo_produto=='Comprimido' %} selected
+                                {% endif %}>Comprimido</option>
+                            <option value="Liquído" {% if produto and produto.tipo_produto=='Liquído' %} selected {%
+                                endif %}>Liquído</option>
+                            <option value="Pó" {% if produto and produto.tipo_produto=='Pó' %} selected {% endif %}>Pó
+                            </option>
+                            <option value="Injetável" {% if produto and produto.tipo_produto=='Injetável' %} selected {%
+                                endif %}>Injetável</option>
+                            <option value="Gasoso" {% if produto and produto.tipo_produto=='Gasoso' %} selected {% endif
+                                %}>Gasoso</option>
+                            <option value="Semissólidos" {% if produto and produto.tipo_produto=='Semissólidos' %}
+                                selected {% endif %}>Semissólidos</option>
+                            <option value="Transdérmicos" {% if produto and produto.tipo_produto=='Transdérmicos' %}
+                                selected {% endif %}>Transdérmicos</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="estoque_minimo">Estoque Mínimo:</label>
+                        <input type="number" id="estoque_minimo" name="estoque_minimo" class="form-control"
+                            value="{{ produto.estoque_minimo if produto else 0 }}" required>
+                    </div>
+                </div>
+
+                <!-- Validade e Lote -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="validade">Validade:</label>
+                        <input type="date" id="validade" name="validade" class="form-control"
+                            value="{{ produto.validade.strftime('%Y-%m-%d') if produto and produto.validade else '' }}"
+                            required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="lote">Lote:</label>
+                        <input type="text" id="lote" name="lote" class="form-control"
+                            value="{{ produto.lote if produto else '' }}" required>
+                    </div>
+                </div>
+
+                <!-- Localização e RFID -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="localizacao">Localização:</label>
+                        <input type="text" id="localizacao" name="localizacao" class="form-control"
+                            value="{{ produto.localizacao if produto else '' }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="RFID">RFID:</label>
+                        <input type="text" id="RFID" name="RFID" class="form-control"
+                            value="{{ produto.RFID if produto else '' }}" required>
+                    </div>
+                </div>
+
+                <!-- Descrição e Fornecedor -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="descricao">Descrição:</label>
+                        <input type="text" id="descricao" name="descricao" class="form-control"
+                            value="{{ produto.descricao if produto else '' }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="fornecedor">Fornecedor:</label>
+                        <input type="text" id="fornecedor" name="fornecedor" class="form-control"
+                            value="{{ produto.fornecedor if produto else '' }}" required>
+                    </div>
+                </div>
+
+                <!-- Foto do Produto -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <label for="foto">Foto do Produto:</label>
+                        <input type="file" id="foto" name="foto" class="form-control" accept="image/*" {% if not produto
+                            %}required{% endif %}>
+
+                        {% if produto and produto.foto %}
+                        <div class="mt-2">
+                            <p class="text-muted mb-1" style="font-size: 14px;">Foto atual:</p>
+                            <img src="{{ url_for('static', filename=produto.foto.replace('\\', '/').replace('static/', '')) }}"
+                                alt="Foto do produto" style="max-height: 100px; border-radius: 8px;" class="shadow-sm">
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Botão de salvar -->
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-outline-success px-5 rounded-pill shadow-sm fw-bold">
+                        <i class="bi bi-check-lg me-2"></i>Salvar Dados
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block conteudo %}
+
+<style>
+    body {
+        background-color: #f5f6fa;
+    }
+
+    .card-dashboard {
+        border-radius: 15px;
+        color: white;
+    }
+
+    .bg-purple {
+        background: #178c69;
+    }
+
+    .bg-green {
+        background: #199a91;
+    }
+
+    .bg-orange {
+        background: #1b93ae;
+    }
+
+    .bg-blue {
+        background: #197695;
+    }
+</style>
+
+<div class="container mt-4">
+    <!-- CARDS -->
+    <div class="row g-3 mb-4">
+
+        <!-- TOTAL CLIENTES -->
+        <div class="col-md-3">
+            <div class="card card-dashboard bg-purple p-3">
+                <h5>Total de Clientes</h5>
+                <h2>{{ clientes|length }}</h2>
+            </div>
+        </div>
+
+        <!-- EXEMPLOS (você pode substituir depois) -->
+        <div class="col-md-3">
+            <div class="card card-dashboard bg-green p-3">
+                <h5>Total Produtos</h5>
+                <h2>{{ produtos|length if produtos else 0 }}</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card card-dashboard bg-orange p-3">
+                <h5>Fornecedores</h5>
+                <h2>{{ fornecedores|length if fornecedores else 0 }}</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card card-dashboard bg-blue p-3">
+                <h5>Funcionários</h5>
+                <h2>{{ funcionarios|length if funcionarios else 0 }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABELA DINÂMICA -->
+    <div class="card shadow">
+        <div class="card-header">
+            <h5>Funcionários Ativos</h5>
+        </div>
+
+        <div class="card-body">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Setor</th>
+                        <th>Turno</th>
+                        <th>E-mail</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for funcionario in funcionarios %}
+                    <tr>
+                        <td>{{ funcionario.nome }}</td>
+                        <td>{{ funcionario.setor }}</td>
+                        <td>{{ funcionario.turno }}</td>
+                        <td>{{ funcionario.e_mail }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center">Nenhum cliente encontrado</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    {% endblock %}

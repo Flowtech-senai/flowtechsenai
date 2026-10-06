@@ -1,0 +1,1033 @@
+{% extends "base.html" %}
+{% block conteudo %}
+<style>
+    :root {
+        --azul-escuro: #012332;
+        --azul-medio: #023852;
+        --verde-agua: #00A896;
+        --verde-agua-hover: #028073;
+        --verde-agua-claro: #e6f6f4;
+        --branco: #ffffff;
+        --cinza-fundo: #f4f7f9;
+        --cinza-borda: #e1e8ed;
+        --texto-suave: #4a5568;
+        --sidebar-gradient-from: #007E83;
+        --sidebar-gradient-to: #35B5A8;
+        --card-bg: #ffffff;
+        --input-bg: #ffffff;
+        --lista-bg: #f8fafc;
+    }
+
+    /* TEMA ESCURO */
+    [data-theme="escuro"] {
+        --azul-escuro: #f1f5f9;
+        --azul-medio: #cbd5e1;
+        --verde-agua: #00a896;
+        --verde-agua-hover: #028073;
+        --verde-agua-claro: #1e293b;
+        --branco: #1e293b;
+        --cinza-fundo: #0f172a;
+        --cinza-borda: #334155;
+        --texto-suave: #94a3b8;
+        --sidebar-gradient-from: #0f172a;
+        --sidebar-gradient-to: #1e293b;
+        --card-bg: #1e293b;
+        --input-bg: #0f172a;
+        --lista-bg: #1e293b;
+    }
+
+    /* --- CONFIGURAÇÃO GERAL --- */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+        background-color: var(--cinza-fundo);
+        color: var(--azul-escuro);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .container {
+        display: flex;
+        width: 95%;
+        max-width: 1400px;
+        margin: 40px auto;
+        gap: 30px;
+    }
+
+    /* --- MENU LATERAL (SIDEBAR) --- */
+    .menu {
+        width: 300px;
+        background: linear-gradient(135deg, var(--sidebar-gradient-from), var(--sidebar-gradient-to));
+        border-radius: 16px;
+        padding: 30px 20px;
+        box-shadow: 0 4px 20px rgba(1, 35, 50, 0.08);
+        flex-shrink: 0;
+        border: 1px solid var(--cinza-borda);
+    }
+
+    .logo {
+        padding: 0 10px 20px;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+        margin-bottom: 20px;
+    }
+
+    .logo h1 {
+        color: #ffffff;
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+    }
+
+    .logo p {
+        color: #e6f6f4;
+        font-size: 13px;
+        font-weight: 500;
+        margin-top: 2px;
+        opacity: 0.9;
+    }
+
+    /* PERFIL NA SIDEBAR */
+    .usuario-sidebar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.12);
+        border-radius: 12px;
+        margin-bottom: 25px;
+    }
+
+    .foto-sidebar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #ffffff;
+    }
+
+    .info-sidebar h4 {
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+
+    .info-sidebar span {
+        color: #e6f6f4;
+        font-size: 11px;
+        opacity: 0.85;
+    }
+
+    .categoria {
+        margin-bottom: 25px;
+    }
+
+    .categoria-titulo {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 0 12px;
+        margin-bottom: 10px;
+    }
+
+    .item {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 10px;
+        cursor: pointer;
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 5px;
+        transition: all 0.25s ease;
+        opacity: 0.85;
+    }
+
+    .item:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+        opacity: 1;
+    }
+
+    .item.ativo {
+        background-color: #012332;
+        color: #ffffff;
+        opacity: 1;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    /* --- PAINEL PRINCIPAL --- */
+    .painel {
+        flex: 1;
+        background-color: var(--card-bg);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(1, 35, 50, 0.05);
+        overflow: hidden;
+        min-height: 600px;
+        border: 1px solid var(--cinza-borda);
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+        width: 600px;
+    }
+
+    .tela {
+        display: none;
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .tela.ativa {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(6px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .cabecalho {
+        padding: 35px 40px;
+        border-bottom: 1px solid var(--cinza-borda);
+    }
+
+    .cabecalho h2 {
+        color: var(--azul-escuro);
+        font-size: 26px;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .cabecalho p {
+        color: var(--texto-suave);
+        font-size: 14px;
+    }
+
+    .conteudo {
+        padding: 40px;
+    }
+
+    /* --- CARDS DE PERFIL --- */
+    .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        margin-bottom: 35px;
+    }
+
+    .card {
+        background-color: var(--cinza-fundo);
+        padding: 24px;
+        border-radius: 12px;
+        border: 1px solid var(--cinza-borda);
+        transition: transform 0.2s, background-color 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+    }
+
+    .card h3 {
+        font-size: 12px;
+        color: var(--texto-suave);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+
+    .card p {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--azul-escuro);
+    }
+
+    /* --- ESTILOS DE FOTO DE PERFIL --- */
+    .secao-foto-perfil {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        padding: 20px;
+        background-color: var(--cinza-fundo);
+        border-radius: 12px;
+        border: 1px solid var(--cinza-borda);
+        margin-bottom: 24px;
+    }
+
+    .foto-container {
+        position: relative;
+        width: 90px;
+        height: 90px;
+    }
+
+    .foto-perfil {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--verde-agua);
+    }
+
+    .botao-upload-foto {
+        display: inline-block;
+        padding: 8px 16px;
+        background-color: var(--verde-agua-claro);
+        color: var(--verde-agua);
+        border: 1px solid var(--verde-agua);
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .botao-upload-foto:hover {
+        background-color: var(--verde-agua);
+        color: #ffffff;
+    }
+
+    /* --- FORMULÁRIOS E INPUTS --- */
+    .formulario {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+    }
+
+    .campo-completo {
+        grid-column: 1 / 3;
+    }
+
+    .campo {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .campo label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--azul-escuro);
+    }
+
+    .campo input,
+    .campo select {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid var(--cinza-borda);
+        border-radius: 8px;
+        outline: none;
+        font-size: 14px;
+        color: var(--azul-escuro);
+        background-color: var(--input-bg);
+        transition: all 0.2s ease;
+    }
+
+    .campo input:focus,
+    .campo select:focus {
+        border-color: var(--verde-agua);
+        box-shadow: 0 0 0 3px rgba(0, 168, 150, 0.15);
+    }
+
+    /* --- COMPONENTES DE CONFIGURAÇÃO (NOTIFICAÇÃO) --- */
+    .lista-config {
+        background-color: var(--lista-bg);
+        border-radius: 12px;
+        padding: 10px 24px;
+        border: 1px solid var(--cinza-borda);
+        margin-bottom: 24px;
+    }
+
+    .config-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 0;
+    }
+
+    .config-texto h3 {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--azul-escuro);
+        margin-bottom: 4px;
+    }
+
+    .config-texto p {
+        font-size: 13px;
+        color: var(--texto-suave);
+    }
+
+    /* SWITCH TOGGLE (LIGA/DESLIGA) */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 48px;
+        height: 26px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #cbd5e1;
+        transition: .3s;
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 4px;
+        bottom: 4px;
+        background-color: #ffffff;
+        transition: .3s;
+        border-radius: 50%;
+    }
+
+    input:checked+.slider {
+        background-color: var(--verde-agua);
+    }
+
+    input:checked+.slider:before {
+        transform: translateX(22px);
+    }
+
+    /* --- BOTÕES E AÇÕES --- */
+    .acoes {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 30px;
+    }
+
+    .botao {
+        padding: 12px 28px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        border: none;
+    }
+
+    .botao-principal {
+        background-color: var(--verde-agua);
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(0, 168, 150, 0.25);
+    }
+
+    .botao-principal:hover {
+        background-color: var(--verde-agua-hover);
+        transform: translateY(-1px);
+    }
+
+    /* --- FEEDBACK SALVO --- */
+    .mensagem-salva {
+        display: none;
+        margin-top: 15px;
+        padding: 12px 20px;
+        background-color: var(--verde-agua-claro);
+        color: var(--verde-agua);
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        border: 1px solid rgba(0, 168, 150, 0.2);
+    }
+</style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- MENU LATERAL -->
+        <aside class="menu">
+            <div class="logo">
+                <h1>Flow Tech</h1>
+                <p data-i18n="subtitulo_menu">Configurações do sistema</p>
+            </div>
+            <div class="categoria">
+                <div class="categoria-titulo" data-i18n="cat_conta">Conta e acesso</div>
+                <div class="item ativo" onclick="abrirTela('perfil', this)" data-i18n="item_perfil">Meu perfil</div>
+            </div>
+            <div class="categoria">
+                <div class="categoria-titulo" data-i18n="cat_sistema">Sistema</div>
+                <div class="item" onclick="abrirTela('notificacoes', this)" data-i18n="item_notificacoes">
+                    Notificações
+                </div>
+                <div class="item" onclick="abrirTela('preferencias', this)" data-i18n="item_preferencias">
+                    Preferências
+                    do sistema</div>
+                <div class="item" onclick="abrirTela('aparencia', this)" data-i18n="item_aparencia">Aparência</div>
+            </div>
+            <div class="categoria">
+                <div class="categoria-titulo" data-i18n="cat_seguranca">Segurança</div>
+                <div class="item" onclick="abrirTela('logs', this)" data-i18n="item_logs">Logs e atividades</div>
+                <div class="item" onclick="abrirTela('privacidade', this)" data-i18n="item_privacidade">Privacidade
+                    e
+                    acesso</div>
+            </div>
+            <div class="categoria">
+                <div class="categoria-titulo" data-i18n="cat_suporte">Suporte</div>
+                <div class="item" onclick="abrirTela('ajuda', this)" data-i18n="item_ajuda">Ajuda</div>
+                <div class="item" onclick="abrirTela('sobre', this)" data-i18n="item_sobre">Sobre o sistema</div>
+            </div>
+        </aside>
+
+        <!-- PAINEL PRINCIPAL COM AS TELAS -->
+        <main class="painel">
+            <!-- SEÇÃO: MEU PERFIL -->
+            <section id="perfil" class="tela ativa">
+                <div class="cabecalho">
+                    <h2 data-i18n="item_perfil">Meu perfil</h2>
+                    <p data-i18n="desc_perfil">Gerencie seus dados pessoais e informações de acesso.</p>
+                </div>
+
+                <div class="conteudo">
+
+                    <!-- FORMULÁRIO ÚNICO DE EDIÇÃO DO PERFIL -->
+                    <form action="/editar-perfil" method="POST" enctype="multipart/form-data" id="form-perfil"
+                        onsubmit="salvarPerfil(event)">
+
+                        <div class="container d-flex justify-content-center align-items-center py-4">
+                            <div class="card shadow-sm border-0 overflow-hidden"
+                                style="max-width: 900px; width: 100%; border-radius: 12px;">
+
+                                <!-- Topo Colorido Flow Tech com Preview de Foto -->
+                                <div class="position-relative d-flex flex-column align-items-center justify-content-center"
+                                    style="border-radius: 30px; height: 200px; background: linear-gradient(135deg, #65ffe3, #0dad95);">
+
+                                    <div class="profile-avatar-container">
+                                        <!-- Mostra a foto vinda do banco ou a foto padrão -->
+                                        {% if usuario_foto and usuario_foto != 'imagens/sem_foto.jpg' %}
+                                        <img src="{{ url_for('static', filename=usuario_foto) }}"
+                                            alt="Adicione sua foto de perfil" id="avatar-preview">
+                                        {% else %}
+                                        <img src="{{ url_for('static', filename='imagens/sem_foto.jpg') }}"
+                                            alt="Sem Foto Padrão" id="avatar-preview">
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Botões da Foto -->
+                                    <div class="d-flex align-items-center"
+                                        style="position: absolute; bottom: 15px; right: 15px; gap: 8px; z-index: 10;">
+                                        <!-- Input invisível para upload da foto -->
+                                        <input type="file" name="foto" id="foto"
+                                            accept="image/png, image/jpeg, image/jpg" style="display: none;">
+
+                                        <!-- Botão de câmera (upload) -->
+                                        <label for="foto" class="bi bi-camera btn btn-success rounded-pill btn-sm"
+                                            style="font-size: 0.70rem; cursor: pointer; margin: 0; padding: 5px 10px;">
+                                        </label>
+
+                                        <!-- Botão de excluir foto -->
+                                        {% if usuario_foto and usuario_foto != 'imagens/sem_foto.jpg' %}
+                                        <a href="/remover-foto" class="bi bi-trash  btn btn-danger rounded-pill btn-sm"
+                                            style="font-size: 0.70rem; cursor: pointer; margin: 0; padding: 5px 10px;"
+                                            onclick="return confirm('Tem certeza que deseja excluir sua foto de perfil?');">
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- CARDS DE INFORMAÇÕES DO USUÁRIO -->
+                                <div class="p-4">
+                                    <div class="row g-3 mb-4">
+                                        <!-- CARD 1: NOME COMPLETO -->
+                                        <div class="col-md-13">
+                                            <div class="p-3 bg-light rounded shadow-sm border h-100">
+                                                <span class="d-block text-uppercase text-muted fw-bold mb-1"
+                                                    style="font-size: 0.7rem; letter-spacing: 0.5px;"
+                                                    data-i18n="lbl_nome_completo">NOME COMPLETO</span>
+                                                <strong class="text-dark fs-6" id="exibicao-nome-usuario">
+                                                    {{ funcionario.nome if funcionario and funcionario.nome else
+                                                    'Administrador do sistema' }}
+                                                </strong>
+                                            </div>
+                                        </div>
+
+                                        <!-- CARD 2: CARGO -->
+                                        <div class="col-md-13">
+                                            <div class="p-3 bg-light rounded shadow-sm border h-100">
+                                                <span class="d-block text-uppercase text-muted fw-bold mb-1"
+                                                    style="font-size: 0.7rem; letter-spacing: 0.5px;"
+                                                    data-i18n="lbl_cargo">CARGO</span>
+                                                <strong class="text-dark fs-6">
+                                                    {{ funcionario.cargo|capitalize if funcionario and funcionario.cargo
+                                                    else 'Administrador' }}
+                                                </strong>
+                                            </div>
+                                        </div>
+
+                                        <!-- CARD 3: STATUS -->
+                                        <div class="col-md-13">
+                                            <div class="p-3 bg-light rounded shadow-sm border h-100">
+                                                <span class="d-block text-uppercase text-muted fw-bold mb-1"
+                                                    style="font-size: 0.7rem; letter-spacing: 0.5px;"
+                                                    data-i18n="lbl_status">STATUS</span>
+                                                <strong class="text-success fs-6" data-i18n="val_status">Conta
+                                                    ativa</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- DEMAIS CAMPOS DO FORMULÁRIO DE EDIÇÃO PODEM ENTRAR AQUI -->
+
+                                    <!-- BOTÃO DE AÇÃO -->
+                                    <div class="acoes d-flex justify-content-end mt-3">
+                                        <button type="submit" class="botao botao-principal btn btn-primary">Salvar
+                                            alterações do perfil</button>
+                                    </div>
+
+                                    <div id="mensagemPerfil" class="mensagem-salva text-success mt-2"
+                                        style="display: none;">
+                                        Perfil atualizado com sucesso!
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </form>
+
+                </div>
+            </section>
+
+
+            <!-- SEÇÃO: NOTIFICAÇÕES -->
+            <section id="notificacoes" class="tela">
+                <div class="cabecalho">
+                    <h2 data-i18n="item_notificacoes">Notificações</h2>
+                    <p data-i18n="desc_notificacoes">Ative ou desative as notificações do sistema.</p>
+                </div>
+                <div class="conteudo">
+                    <div class="lista-config">
+                        <div class="config-item">
+                            <div class="config-texto">
+                                <h3 data-i18n="item_notificacoes">Notificações</h3>
+                                <p data-i18n="sub_notificacoes">Receber alertas sobre acontecimentos do sistema.</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="check-notificacoes" name="notificacoes" {% if config and
+                                    config.notificacoes %}checked{% endif %}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="acoes">
+                        <button class="botao botao-principal" onclick="salvarNotificacoes()"
+                            data-i18n="btn_salvar_notif">Salvar notificações</button>
+                    </div>
+                    <div id="mensagemNotificacoes" class="mensagem-salva" data-i18n="msg_notif_salva">
+                        Notificações salvas com sucesso.
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO: PREFERÊNCIAS DO SISTEMA -->
+            <section id="preferencias" class="tela">
+                <div class="cabecalho">
+                    <h2 data-i18n="item_preferencias">Preferências do sistema</h2>
+                    <p data-i18n="desc_preferencias">Defina as preferências do Flow Tech.</p>
+                </div>
+                <div class="conteudo">
+                    <div class="formulario">
+                        <div class="campo campo-completo">
+                            <label for="idioma" data-i18n="lbl_idioma">Idioma</label>
+                            <select id="idioma" name="idioma">
+                                <option value="pt-BR" {% if config and config.idioma=='pt-BR' %}selected{% endif %}>
+                                    Português - Brasil</option>
+                                <option value="en-US" {% if config and (config.idioma=='en-US' or config.idioma=='en' )
+                                    %}selected{% endif %}>Inglês (US)</option>
+                                <option value="es-ES" {% if config and config.idioma=='es-ES' %}selected{% endif %}>
+                                    Espanhol</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="acoes">
+                        <button class="botao botao-principal" onclick="salvarIdioma()"
+                            data-i18n="btn_salvar_idioma">Salvar
+                            idioma</button>
+                    </div>
+                    <div id="mensagemIdioma" class="mensagem-salva" data-i18n="msg_idioma_salvo">
+                        Idioma salvo com sucesso.
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO: APARÊNCIA -->
+            <section id="aparencia" class="tela">
+                <div class="cabecalho">
+                    <h2 data-i18n="item_aparencia">Aparência</h2>
+                    <p data-i18n="desc_aparencia">Configure a identidade visual e o tema de exibição da plataforma.
+                    </p>
+                </div>
+                <div class="conteudo">
+                    <div class="formulario">
+                        <div class="campo campo-completo">
+                            <label for="tema" data-i18n="lbl_tema">Tema do Sistema</label>
+                            <select id="tema" name="tema" onchange="aplicarTemaLocal(this.value)">
+                                <option value="claro" {% if config and config.tema=='claro' %}selected{% endif %}
+                                    data-i18n="opt_claro">Claro</option>
+                                <option value="escuro" {% if config and config.tema=='escuro' %}selected{% endif %}
+                                    data-i18n="opt_escuro">Escuro</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="acoes">
+                        <button class="botao botao-principal" onclick="salvarAparencia()"
+                            data-i18n="btn_salvar_aparencia">Salvar aparência</button>
+                    </div>
+                    <div id="mensagemAparencia" class="mensagem-salva" data-i18n="msg_aparencia_salva">
+                        Aparência salva com sucesso.
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO: LOGS E ATIVIDADES -->
+            <section id="logs" class="tela">
+                <div class="cabecalho">
+                    <h2 data-i18n="item_logs">Logs e atividades</h2>
+                    <p data-i18n="desc_logs">Histórico de operações no sistema.</p>
+                </div>
+                <div class="conteudo">
+                    <div class="card">
+                        <p style="font-size: 14px; font-weight: normal; color: var(--texto-suave);"
+                            data-i18n="txt_sem_logs">Nenhum log recente detectado.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO: PRIVACIDADE E ACESSO -->
+            <section id="privacidade" class="tela">
+                <div class="cabecalho">
+                    <h2 data-i18n="item_privacidade">Privacidade e acesso</h2>
+                    <p data-i18n="desc_privacidade">Configurações de privacidade.</p>
+                </div>
+                <div class="conteudo">
+                    <div class="card">
+                        <h3 data-i18n="lbl_permissoes">Permissões</h3>
+                        <p data-i18n="txt_permissoes">Gerenciamento de permissões do usuário.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO: AJUDA -->
+            <section id="ajuda" class="tela">
+                <div class="cabecalho">
+                    <h2 data-i18n="item_ajuda">Ajuda</h2>
+                    <p data-i18n="desc_ajuda">Precisa de suporte?</p>
+                </div>
+                <div class="conteudo">
+                    <div class="card">
+                        <h3 data-i18n="lbl_contato">Contato</h3>
+                        <p data-i18n="txt_contato">Entre em contato com o administrador em:
+                            <strong>suporte@flowtech.com</strong>
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO: SOBRE O SISTEMA -->
+            <section id="sobre" class="tela">
+                <div class="cabecalho">
+                    <h2 data-i18n="item_sobre">Sobre o sistema</h2>
+                    <p data-i18n="desc_sobre">Informações da plataforma.</p>
+                </div>
+                <div class="conteudo">
+                    <div class="card">
+                        <h3 data-i18n="lbl_versao">Versão</h3>
+                        <p data-i18n="txt_versao">Flow Tech v1.0.0 - Todos os direitos reservados.</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- SCRIPT DE NAVEGAÇÃO E TRADUÇÃO -->
+    <script>
+        // TRADUÇÕES EM TEMPO REAL (i18n)
+        const traducoes = {
+            'pt-BR': {
+                subtitulo_menu: 'Configurações do sistema',
+                cat_conta: 'Conta e acesso',
+                item_perfil: 'Meu perfil',
+                item_senha: 'Alterar senha',
+                cat_sistema: 'Sistema',
+                item_notificacoes: 'Notificações',
+                item_preferencias: 'Preferências do sistema',
+                item_aparencia: 'Aparência',
+                cat_seguranca: 'Segurança',
+                item_logs: 'Logs e atividades',
+                item_privacidade: 'Privacidade e acesso',
+                cat_suporte: 'Suporte',
+                item_ajuda: 'Ajuda',
+                item_sobre: 'Sobre o sistema',
+                desc_perfil: 'Gerencie seus dados pessoais e informações de acesso.',
+                lbl_nome_completo: 'Nome completo',
+                lbl_cargo: 'Cargo',
+                lbl_status: 'Status',
+                val_status: 'Conta ativa',
+                desc_senha: 'Atualize sua senha para manter sua conta protegida.',
+                lbl_senha_atual: 'Senha atual',
+                lbl_nova_senha: 'Nova senha',
+                lbl_conf_senha: 'Confirmar nova senha',
+                lbl_req_senha: 'Requisitos da senha',
+                txt_req_senha: 'Mínimo de 8 caracteres<br>Pelo menos uma letra maiúscula<br>Pelo menos uma letra minúscula<br>Pelo menos um número',
+                btn_alterar_senha: 'Alterar senha',
+                desc_notificacoes: 'Ative ou desative as notificações do sistema.',
+                sub_notificacoes: 'Receber alertas sobre acontecimentos do sistema.',
+                btn_salvar_notif: 'Salvar notificações',
+                msg_notif_salva: 'Notificações salvas com sucesso.',
+                desc_preferencias: 'Defina as preferências do Flow Tech.',
+                lbl_idioma: 'Idioma',
+                btn_salvar_idioma: 'Salvar idioma',
+                msg_idioma_salvo: 'Idioma salvo com sucesso.',
+                desc_aparencia: 'Configure a identidade visual e o tema de exibição da plataforma.',
+                lbl_tema: 'Tema do Sistema',
+                opt_claro: 'Claro',
+                opt_escuro: 'Escuro',
+                btn_salvar_aparencia: 'Salvar aparência',
+                msg_aparencia_salva: 'Aparência salva com sucesso.',
+                desc_logs: 'Histórico de operações no sistema.',
+                txt_sem_logs: 'Nenhum log recente detectado.',
+                desc_privacidade: 'Configurações de privacidade.',
+                lbl_permissoes: 'Permissões',
+                txt_permissoes: 'Gerenciamento de permissões do usuário.',
+                desc_ajuda: 'Precisa de suporte?',
+                lbl_contato: 'Contato',
+                txt_contato: 'Entre em contato com o administrador em: <strong>suporte@flowtech.com</strong>',
+                desc_sobre: 'Informações da plataforma.',
+                lbl_versao: 'Versão',
+                txt_versao: 'Flow Tech v1.0.0 - Todos os direitos reservados.'
+            },
+            'en-US': {
+                subtitulo_menu: 'System settings',
+                cat_conta: 'Account & Access',
+                item_perfil: 'My Profile',
+                item_senha: 'Change Password',
+                cat_sistema: 'System',
+                item_notificacoes: 'Notifications',
+                item_preferencias: 'System Preferences',
+                item_aparencia: 'Appearance',
+                cat_seguranca: 'Security',
+                item_logs: 'Logs & Activities',
+                item_privacidade: 'Privacy & Access',
+                cat_suporte: 'Support',
+                item_ajuda: 'Help',
+                item_sobre: 'About System',
+                desc_perfil: 'Manage your personal data and access information.',
+                lbl_nome_completo: 'Full Name',
+                lbl_cargo: 'Role',
+                lbl_status: 'Status',
+                val_status: 'Active Account',
+                desc_senha: 'Update your password to keep your account secure.',
+                lbl_senha_atual: 'Current Password',
+                lbl_nova_senha: 'New Password',
+                lbl_conf_senha: 'Confirm New Password',
+                lbl_req_senha: 'Password Requirements',
+                txt_req_senha: 'Minimum 8 characters<br>At least one uppercase letter<br>At least one lowercase letter<br>At least one number',
+                btn_alterar_senha: 'Change Password',
+                desc_notificacoes: 'Enable or disable system notifications.',
+                sub_notificacoes: 'Receive alerts about system events.',
+                btn_salvar_notif: 'Save Notifications',
+                msg_notif_salva: 'Notifications saved successfully.',
+                desc_preferencias: 'Set Flow Tech system preferences.',
+                lbl_idioma: 'Language',
+                btn_salvar_idioma: 'Save Language',
+                msg_idioma_salvo: 'Language saved successfully.',
+                desc_aparencia: 'Configure the platform visual theme.',
+                lbl_tema: 'System Theme',
+                opt_claro: 'Light',
+                opt_escuro: 'Dark',
+                btn_salvar_aparencia: 'Save Appearance',
+                msg_aparencia_salva: 'Appearance saved successfully.',
+                desc_logs: 'Operation history in the system.',
+                txt_sem_logs: 'No recent logs detected.',
+                desc_privacidade: 'Privacy settings.',
+                lbl_permissoes: 'Permissions',
+                txt_permissoes: 'User permissions management.',
+                desc_ajuda: 'Need help?',
+                lbl_contato: 'Contact',
+                txt_contato: 'Contact administrator at: <strong>suporte@flowtech.com</strong>',
+                desc_sobre: 'Platform information.',
+                lbl_versao: 'Version',
+                txt_versao: 'Flow Tech v1.0.0 - All rights reserved.'
+            },
+            'es-ES': {
+                subtitulo_menu: 'Configuración del sistema',
+                cat_conta: 'Cuenta y acceso',
+                item_perfil: 'Mi perfil',
+                item_senha: 'Cambiar contraseña',
+                cat_sistema: 'Sistema',
+                item_notificacoes: 'Notificaciones',
+                item_preferencias: 'Preferencias del sistema',
+                item_aparencia: 'Apariencia',
+                cat_seguranca: 'Seguridad',
+                item_logs: 'Registros y actividades',
+                item_privacidade: 'Privacidad y acceso',
+                cat_suporte: 'Soporte',
+                item_ajuda: 'Ayuda',
+                item_sobre: 'Acerca del sistema',
+                desc_perfil: 'Gestione sus datos personales e información de acceso.',
+                lbl_nome_completo: 'Nombre completo',
+                lbl_cargo: 'Cargo',
+                lbl_status: 'Estado',
+                val_status: 'Cuenta activa',
+                desc_senha: 'Actualice su contraseña para mantener protegida su cuenta.',
+                lbl_senha_atual: 'Contraseña actual',
+                lbl_nova_senha: 'Nueva contraseña',
+                lbl_conf_senha: 'Confirmar nueva contraseña',
+                lbl_req_senha: 'Requisitos de la contraseña',
+                txt_req_senha: 'Mínimo de 8 caracteres<br>Al menos una letra mayúscula<br>Al menos una letra minúscula<br>Al menos un número',
+                btn_alterar_senha: 'Cambiar contraseña',
+                desc_notificacoes: 'Active o desactive las notificaciones del sistema.',
+                sub_notificacoes: 'Recibir alertas sobre eventos del sistema.',
+                btn_salvar_notif: 'Guardar notificaciones',
+                msg_notif_salva: 'Notificaciones guardadas con éxito.',
+                desc_preferencias: 'Defina las preferencias de Flow Tech.',
+                lbl_idioma: 'Idioma',
+                btn_salvar_idioma: 'Guardar idioma',
+                msg_idioma_salvo: 'Idioma guardado con éxito.',
+                desc_aparencia: 'Configure la identidad visual y tema de la plataforma.',
+                lbl_tema: 'Tema del Sistema',
+                opt_claro: 'Claro',
+                opt_escuro: 'Oscuro',
+                btn_salvar_aparencia: 'Guardar apariencia',
+                msg_aparencia_salva: 'Apariencia guardada con éxito.',
+                desc_logs: 'Historial de operaciones en el sistema.',
+                txt_sem_logs: 'No se detectaron registros recientes.',
+                desc_privacidade: 'Configuración de privacidad.',
+                lbl_permissoes: 'Permisos',
+                txt_permissoes: 'Gestión de permisos de usuario.',
+                desc_ajuda: '¿Necesita ayuda?',
+                lbl_contato: 'Contacto',
+                txt_contato: 'Póngase en contacto con el administrador en: <strong>suporte@flowtech.com</strong>',
+                desc_sobre: 'Información de la plataforma.',
+                lbl_versao: 'Versión',
+                txt_versao: 'Flow Tech v1.0.0 - Todos los derechos reservados.'
+            }
+        };
+
+        function aplicarIdiomaLocal(lang) {
+            const dic = traducoes[lang] || traducoes['pt-BR'];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const chave = el.getAttribute('data-i18n');
+                if (dic[chave]) {
+                    el.innerHTML = dic[chave];
+                }
+            });
+            document.documentElement.lang = lang;
+        }
+
+        function aplicarTemaLocal(tema) {
+            document.documentElement.setAttribute('data-theme', tema);
+        }
+
+        function abrirTela(idTela, elementoClicado) {
+            const telas = document.querySelectorAll('.tela');
+            telas.forEach(tela => tela.classList.remove('ativa'));
+
+            const itensMenu = document.querySelectorAll('.item');
+            itensMenu.forEach(item => item.classList.remove('ativo'));
+
+            const telaAlvo = document.getElementById(idTela);
+            if (telaAlvo) {
+                telaAlvo.classList.add('ativa');
+            }
+            elementoClicado.classList.add('ativo');
+        }
+
+        function salvarNotificacoes() {
+            const statusNotificacao = document.getElementById('check-notificacoes').checked;
+
+            fetch('/api/salvar_notificacoes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ notificacoes: statusNotificacao })
+            })
+                .then(response => response.json())
+                .then(dados => {
+                    if (dados.sucesso) {
+                        const msg = document.getElementById('mensagemNotificacoes');
+                        msg.style.display = 'block';
+                        setTimeout(() => { msg.style.display = 'none'; }, 3000);
+                    } else {
+                        alert("Erro ao salvar: " + dados.erros.join(", "));
+                    }
+                })
+                .catch(() => alert("Erro de conexão ao tentar salvar as notificações."));
+        }
+
+        function salvarIdioma() {
+            const idiomaSelecionado = document.getElementById('idioma').value;
+
+            fetch('/api/salvar_idioma', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idioma: idiomaSelecionado })
+            })
+                .then(response => response.json())
+                .then(dados => {
+                    if (dados.sucesso) {
+                        aplicarIdiomaLocal(idiomaSelecionado);
+                        const msg = document.getElementById('mensagemIdioma');
+                        msg.style.display = 'block';
+                        setTimeout(() => { msg.style.display = 'none'; }, 3000);
+                    } else {
+                        alert("Erro ao salvar: " + dados.erros.join(", "));
+                    }
+                })
+                .catch(() => alert("Erro de conexão ao tentar salvar o idioma."));
+        }
+
+        function salvarAparencia() {
+            const temaSelecionado = document.getElementById('tema').value;
+
+            fetch('/api/salvar_aparencia', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tema: temaSelecionado })
+            })
+                .then(response => response.json())
+                .then(dados => {
+                    if (dados.sucesso) {
+                        aplicarTemaLocal(temaSelecionado);
+                        const msg = document.getElementById('mensagemAparencia');
+                        msg.style.display = 'block';
+                        setTimeout(() => { msg.style.display = 'none'; }, 3000);
+                    } else {
+                        alert("Erro ao salvar: " + dados.erros.join(", "));
+                    }
+                })
+                .catch(() => alert("Erro de conexão ao tentar salvar a aparência."));
+        }
+
+        // Executar inicializações no carregamento
+        window.addEventListener('DOMContentLoaded', () => {
+            const langInicial = document.getElementById('idioma').value;
+            if (langInicial) aplicarIdiomaLocal(langInicial);
+        });
+    </script>
+    {% endblock %}
