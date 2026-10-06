@@ -1,65 +1,41 @@
-# ==========================================
-# AMBIENTES VIRTUAIS (Virtual Environments)
-# ==========================================
-venv/
-.venv/
-env/
-ENV/
-env.bak/
-venv.bak/
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
-# ==========================================
-# CACHE E COMPILAÇÃO DE PYTHON
-# ==========================================
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
+# dependencies
+node_modules/
 
-# ==========================================
-# VARIÁVEIS DE AMBIENTE E SEGREDOS
-# ==========================================
-.env
-.env.local
-.env.*.local
-*.env
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
 
-# ==========================================
-# FLASK & BASE DE DADOS LOCAL
-# ==========================================
-# Pasta interna do Flask (Sessões, DBs de dev)
-instance/
-# Bases de dados SQLite locais
-*.db
-*.sqlite
-*.sqlite3
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
 
-# ==========================================
-# REGISTOS DE ERROS E LOGS
-# ==========================================
-*.log
-logs/
+# Metro
+.metro-health-check*
 
-# ==========================================
-# EDITORES DE CÓDIGO E IDEs
-# ==========================================
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
 
-# ==========================================
-# FICHEIROS DO SISTEMA OPERATIVO
-# ==========================================
+# macOS
 .DS_Store
-Thumbs.db
+*.pem
 
-# ==========================================
-# TESTES E COBERTURA DE CÓDIGO
-# ==========================================
-.coverage
-htmlcov/
-.pytest_cache/
-.tox/
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+# generated native folders
+/ios
+/android
