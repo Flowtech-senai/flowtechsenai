@@ -1,0 +1,65 @@
+# ==========================================
+# AMBIENTES VIRTUAIS (Virtual Environments)
+# ==========================================
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# ==========================================
+# CACHE E COMPILAÇÃO DE PYTHON
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# ==========================================
+# VARIÁVEIS DE AMBIENTE E SEGREDOS
+# ==========================================
+.env
+.env.local
+.env.*.local
+*.env
+
+# ==========================================
+# FLASK & BASE DE DADOS LOCAL
+# ==========================================
+# Pasta interna do Flask (Sessões, DBs de dev)
+instance/
+# Bases de dados SQLite locais
+*.db
+*.sqlite
+*.sqlite3
+
+# ==========================================
+# REGISTOS DE ERROS E LOGS
+# ==========================================
+*.log
+logs/
+
+# ==========================================
+# EDITORES DE CÓDIGO E IDEs
+# ==========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ==========================================
+# FICHEIROS DO SISTEMA OPERATIVO
+# ==========================================
+.DS_Store
+Thumbs.db
+
+# ==========================================
+# TESTES E COBERTURA DE CÓDIGO
+# ==========================================
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
