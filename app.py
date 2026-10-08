@@ -955,9 +955,7 @@ def suporte():
 def automacao():
     return render_template('automacao.html')
 
-@app.route('/teste')
-def teste():
-    return render_template('teste.html')
+
 
 # --- TELA DE CONFIGURAÇÂO ---
 @app.context_processor
