@@ -44,23 +44,15 @@
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    body {
-        background-color: var(--cinza-fundo);
-        color: var(--azul-escuro);
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        min-height: 100vh;
-        transition: background-color 0.3s ease, color 0.3s ease;
-    }
-
-    .container {
-        display: flex;
-        width: 95%;
-        max-width: 1400px;
-        margin: 40px auto;
-        gap: 30px;
-    }
+  
+.config-layout {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    gap: 30px;
+}
 
     /* --- MENU LATERAL (SIDEBAR) --- */
     .menu {
@@ -489,10 +481,15 @@
             </div>
             <div class="categoria">
                 <div class="categoria-titulo" data-i18n="cat_suporte">Suporte</div>
-                <div class="item" onclick="abrirTela('ajuda', this)" data-i18n="item_ajuda">Ajuda</div>
-                <div class="item" onclick="abrirTela('sobre', this)" data-i18n="item_sobre">Sobre o sistema</div>
-            </div>
-        </aside>
+
+                <div class="item" onclick="window.location.href='/suporte'" data-i18n="item_ajuda">
+                Ajuda
+                </div>
+
+                <div class="item" onclick="abrirTela('sobre', this)" data-i18n="item_sobre">
+                Sobre o sistema
+                </div>
+            </div>"
 
         <!-- PAINEL PRINCIPAL COM AS TELAS -->
         <main class="painel">

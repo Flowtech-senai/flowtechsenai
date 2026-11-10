@@ -15,6 +15,8 @@ from models.pedido_saida import PedidoSaida
 from models.sensor import Sensor
 from models.configuracao import Configuracao
 
+from chatbot.respostas import gerar_resposta
+
 # limpar nome de arquivos enviados por upload
 from werkzeug.utils import secure_filename
 
@@ -947,9 +949,6 @@ def solucoes():
 def integracoes():
     return render_template('integracoes.html')
 
-@app.route('/suporte')
-def suporte():
-    return render_template('suporte.html')
 
 @app.route('/automacao')
 def automacao():
@@ -1254,6 +1253,37 @@ def redefinir_senha():
             cursor.close()
         if conexao:
             conexao.close()
+
+# --- ROTAS DE SUPORTE E CHATBOT ---
+
+@app.route('/suporte')
+def suporte():
+    return render_template('suporte.html')
+
+
+@app.route('/chatbot/perguntar', methods=['POST'])
+def chatbot_perguntar():
+    dados = request.get_json(silent=True) or {}
+    mensagem = dados.get('mensagem', '').strip()
+
+    if not mensagem:
+        return jsonify({
+            "erro": "Digite uma mensagem para continuar."
+        }), 400
+
+    try:
+        resposta = gerar_resposta(mensagem)
+
+        return jsonify({
+            "resposta": resposta
+        }), 200
+
+    except Exception as erro:
+        print(f"Erro no chatbot: {erro}")
+
+        return jsonify({
+            "erro": "Não foi possível gerar uma resposta."
+        }), 500
 
 
 if __name__ == "__main__":
