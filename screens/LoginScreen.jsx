@@ -71,325 +71,323 @@ export default function LoginScreen({ navigation }) {
         Alert.alert(
           'Erro',
           response.data?.message ||
-            'E-mail ou senha incorretos.'
+          'E-mail ou senha incorretos.'
         );
       }
     } catch (error) {
-      console.log(
-        'ERRO DO SERVIDOR:',
-        error.response?.data
-      );
+      console.log("DETALHES DO ERRO:", JSON.stringify(error, null, 2));
 
-      const mensagemErro =
-        error.response?.data?.message ||
-        'E-mail ou senha incorretos.';
 
-      Alert.alert(
-        'Erro de Login',
-        mensagemErro
-      );
-    }
+  const mensagemErro =
+    error.response?.data?.message ||
+    'E-mail ou senha incorretos.';
+
+  Alert.alert(
+    'Erro de Login',
+    mensagemErro
+  );
+}
   };
 
-  // ==============================
-  // TELA
-  // ==============================
+// ==============================
+// TELA
+// ==============================
 
-  return (
-    <SafeAreaView
-      style={[
-        styles.container,
-        {
-          backgroundColor: cores.fundo,
-        },
-      ]}
-    >
-      <View style={styles.content}>
+return (
+  <SafeAreaView
+    style={[
+      styles.container,
+      {
+        backgroundColor: cores.fundo,
+      },
+    ]}
+  >
+    <View style={styles.content}>
 
-        {/* ==================================
+      {/* ==================================
             LOGO
         ================================== */}
 
-        <View style={styles.logoContainer}>
-          <Image
-            source={require('../assets/logo.png')}
-            style={styles.logoImage}
-            resizeMode="contain"
+      <View style={styles.logoContainer}>
+        <Image
+          source={require('../assets/logo.png')}
+          style={styles.logoImage}
+          resizeMode="contain"
+        />
+
+        <Text
+          style={[
+            styles.brandName,
+            {
+              color: cores.primaria,
+            },
+          ]}
+        >
+          FlowTech
+        </Text>
+      </View>
+
+      {/* ==================================
+            BOAS-VINDAS
+        ================================== */}
+
+      <Text
+        style={[
+          styles.title,
+          {
+            color: cores.texto,
+          },
+        ]}
+      >
+        Bem-vindo!
+      </Text>
+
+      <Text
+        style={[
+          styles.subtitle,
+          {
+            color: cores.textoSecundario,
+          },
+        ]}
+      >
+        Faça seu login para continuar
+      </Text>
+
+      {/* ==================================
+            E-MAIL
+        ================================== */}
+
+      <Text
+        style={[
+          styles.label,
+          {
+            color: cores.texto,
+          },
+        ]}
+      >
+        Login:
+      </Text>
+
+      <View
+        style={[
+          styles.inputContainer,
+          {
+            backgroundColor: cores.input,
+            borderColor: cores.borda,
+          },
+        ]}
+      >
+        <MaterialIcons
+          name="email"
+          size={20}
+          color={cores.textoSecundario}
+          style={styles.inputIcon}
+        />
+
+        <TextInput
+          style={[
+            styles.input,
+            {
+              color: cores.texto,
+            },
+          ]}
+          placeholder="Digite seu email"
+          placeholderTextColor={
+            cores.textoSecundario
+          }
+          keyboardType="email-address"
+          autoCapitalize="none"
+          value={e_mail}
+          onChangeText={setE_mail}
+        />
+      </View>
+
+      {/* ==================================
+            SENHA
+        ================================== */}
+
+      <Text
+        style={[
+          styles.label,
+          {
+            color: cores.texto,
+          },
+        ]}
+      >
+        Senha:
+      </Text>
+
+      <View
+        style={[
+          styles.inputContainer,
+          {
+            backgroundColor: cores.input,
+            borderColor: cores.borda,
+          },
+        ]}
+      >
+        <FontAwesome
+          name="lock"
+          size={20}
+          color={cores.textoSecundario}
+          style={styles.inputIcon}
+        />
+
+        <TextInput
+          style={[
+            styles.input,
+            {
+              color: cores.texto,
+            },
+          ]}
+          placeholder="Digite sua senha"
+          placeholderTextColor={
+            cores.textoSecundario
+          }
+          secureTextEntry={secureText}
+          value={senha}
+          onChangeText={setSenha}
+        />
+
+        {/* OLHO DA SENHA */}
+
+        <TouchableOpacity
+          onPress={() =>
+            setSecureText(!secureText)
+          }
+          style={styles.eyeButton}
+        >
+          <MaterialIcons
+            name={
+              secureText
+                ? 'visibility-off'
+                : 'visibility'
+            }
+            size={22}
+            color={cores.textoSecundario}
           />
+        </TouchableOpacity>
+      </View>
+
+      {/* ==================================
+            OPÇÕES
+        ================================== */}
+
+      <View style={styles.rowOptions}>
+
+        {/* LEMBRAR DE MIM */}
+
+        <TouchableOpacity
+          style={styles.checkboxContainer}
+          onPress={() =>
+            setRememberMe(!rememberMe)
+          }
+        >
+          <View
+            style={[
+              styles.checkbox,
+              {
+                borderColor:
+                  cores.textoSecundario,
+              },
+              rememberMe && {
+                backgroundColor:
+                  cores.primaria,
+                borderColor:
+                  cores.primaria,
+              },
+            ]}
+          >
+            {rememberMe && (
+              <MaterialIcons
+                name="check"
+                size={12}
+                color="#FFFFFF"
+              />
+            )}
+          </View>
 
           <Text
             style={[
-              styles.brandName,
+              styles.checkboxLabel,
+              {
+                color: cores.texto,
+              },
+            ]}
+          >
+            Lembrar de mim
+          </Text>
+        </TouchableOpacity>
+
+        {/* ESQUECI A SENHA */}
+
+        <TouchableOpacity>
+          <Text
+            style={[
+              styles.forgotPasswordText,
               {
                 color: cores.primaria,
               },
             ]}
           >
-            FlowTech
+            Esqueci minha senha
           </Text>
-        </View>
+        </TouchableOpacity>
+      </View>
 
-        {/* ==================================
-            BOAS-VINDAS
-        ================================== */}
-
-        <Text
-          style={[
-            styles.title,
-            {
-              color: cores.texto,
-            },
-          ]}
-        >
-          Bem-vindo!
-        </Text>
-
-        <Text
-          style={[
-            styles.subtitle,
-            {
-              color: cores.textoSecundario,
-            },
-          ]}
-        >
-          Faça seu login para continuar
-        </Text>
-
-        {/* ==================================
-            E-MAIL
-        ================================== */}
-
-        <Text
-          style={[
-            styles.label,
-            {
-              color: cores.texto,
-            },
-          ]}
-        >
-          Login:
-        </Text>
-
-        <View
-          style={[
-            styles.inputContainer,
-            {
-              backgroundColor: cores.input,
-              borderColor: cores.borda,
-            },
-          ]}
-        >
-          <MaterialIcons
-            name="email"
-            size={20}
-            color={cores.textoSecundario}
-            style={styles.inputIcon}
-          />
-
-          <TextInput
-            style={[
-              styles.input,
-              {
-                color: cores.texto,
-              },
-            ]}
-            placeholder="Digite seu email"
-            placeholderTextColor={
-              cores.textoSecundario
-            }
-            keyboardType="email-address"
-            autoCapitalize="none"
-            value={e_mail}
-            onChangeText={setE_mail}
-          />
-        </View>
-
-        {/* ==================================
-            SENHA
-        ================================== */}
-
-        <Text
-          style={[
-            styles.label,
-            {
-              color: cores.texto,
-            },
-          ]}
-        >
-          Senha:
-        </Text>
-
-        <View
-          style={[
-            styles.inputContainer,
-            {
-              backgroundColor: cores.input,
-              borderColor: cores.borda,
-            },
-          ]}
-        >
-          <FontAwesome
-            name="lock"
-            size={20}
-            color={cores.textoSecundario}
-            style={styles.inputIcon}
-          />
-
-          <TextInput
-            style={[
-              styles.input,
-              {
-                color: cores.texto,
-              },
-            ]}
-            placeholder="Digite sua senha"
-            placeholderTextColor={
-              cores.textoSecundario
-            }
-            secureTextEntry={secureText}
-            value={senha}
-            onChangeText={setSenha}
-          />
-
-          {/* OLHO DA SENHA */}
-
-          <TouchableOpacity
-            onPress={() =>
-              setSecureText(!secureText)
-            }
-            style={styles.eyeButton}
-          >
-            <MaterialIcons
-              name={
-                secureText
-                  ? 'visibility-off'
-                  : 'visibility'
-              }
-              size={22}
-              color={cores.textoSecundario}
-            />
-          </TouchableOpacity>
-        </View>
-
-        {/* ==================================
-            OPÇÕES
-        ================================== */}
-
-        <View style={styles.rowOptions}>
-
-          {/* LEMBRAR DE MIM */}
-
-          <TouchableOpacity
-            style={styles.checkboxContainer}
-            onPress={() =>
-              setRememberMe(!rememberMe)
-            }
-          >
-            <View
-              style={[
-                styles.checkbox,
-                {
-                  borderColor:
-                    cores.textoSecundario,
-                },
-                rememberMe && {
-                  backgroundColor:
-                    cores.primaria,
-                  borderColor:
-                    cores.primaria,
-                },
-              ]}
-            >
-              {rememberMe && (
-                <MaterialIcons
-                  name="check"
-                  size={12}
-                  color="#FFFFFF"
-                />
-              )}
-            </View>
-
-            <Text
-              style={[
-                styles.checkboxLabel,
-                {
-                  color: cores.texto,
-                },
-              ]}
-            >
-              Lembrar de mim
-            </Text>
-          </TouchableOpacity>
-
-          {/* ESQUECI A SENHA */}
-
-          <TouchableOpacity>
-            <Text
-              style={[
-                styles.forgotPasswordText,
-                {
-                  color: cores.primaria,
-                },
-              ]}
-            >
-              Esqueci minha senha
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* ==================================
+      {/* ==================================
             BOTÃO LOGIN
         ================================== */}
 
-        <TouchableOpacity
-          style={[
-            styles.button,
-            {
-              backgroundColor: cores.primaria,
-            },
-          ]}
-          onPress={handleLogin}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.buttonText}>
-            Login
-          </Text>
-        </TouchableOpacity>
+      <TouchableOpacity
+        style={[
+          styles.button,
+          {
+            backgroundColor: cores.primaria,
+          },
+        ]}
+        onPress={handleLogin}
+        activeOpacity={0.8}
+      >
+        <Text style={styles.buttonText}>
+          Login
+        </Text>
+      </TouchableOpacity>
 
-        {/* ==================================
+      {/* ==================================
             RODAPÉ
         ================================== */}
 
-        <View style={styles.footer}>
-          <TouchableOpacity>
-            <Text
-              style={[
-                styles.footerLink,
-                {
-                  color: cores.primaria,
-                },
-              ]}
-            >
-              suporte
-            </Text>
-          </TouchableOpacity>
+      <View style={styles.footer}>
+        <TouchableOpacity>
+          <Text
+            style={[
+              styles.footerLink,
+              {
+                color: cores.primaria,
+              },
+            ]}
+          >
+            suporte
+          </Text>
+        </TouchableOpacity>
 
-          <TouchableOpacity>
-            <Text
-              style={[
-                styles.footerLink,
-                {
-                  color: cores.primaria,
-                },
-              ]}
-            >
-              termos de uso
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity>
+          <Text
+            style={[
+              styles.footerLink,
+              {
+                color: cores.primaria,
+              },
+            ]}
+          >
+            termos de uso
+          </Text>
+        </TouchableOpacity>
       </View>
-    </SafeAreaView>
-  );
+    </View>
+  </SafeAreaView>
+);
 }
 
 // ========================================
