@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Suporte Técnico | Flowtech</title>
+
     <style>
         * {
             box-sizing: border-box;
@@ -24,7 +25,7 @@
             color: #fff;
             padding: 2rem 1rem;
             text-align: center;
-            border-bottom: 4rem solid #00a896;
+            border-bottom: 4px solid #00a896;
         }
 
         header h1 {
@@ -38,7 +39,7 @@
 
         .container {
             max-width: 900px;
-            margin: -2rem auto 3rem auto;
+            margin: 2rem auto 3rem auto;
             background: #fff;
             padding: 2.5rem;
             border-radius: 8px;
@@ -54,8 +55,7 @@
             padding-bottom: 0.3rem;
         }
 
-        p,
-        li {
+        p, li {
             color: #4a5568;
             font-size: 0.98rem;
             margin-bottom: 0.8rem;
@@ -69,12 +69,104 @@
             border-radius: 4px;
         }
 
-        footer {
-            text-align: center;
-            padding: 1.5rem;
+        .chat-box {
+            margin-top: 2rem;
+            border: 1px solid #dce5eb;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: #0d253f;
+            color: white;
+            padding: 1rem;
+        }
+
+        .chat-header h3 {
+            font-size: 1.1rem;
+        }
+
+        .chat-header p {
+            color: #d5e1eb;
             font-size: 0.85rem;
-            color: #718096;
+            margin: 0;
+        }
+
+        .chat-messages {
+            height: 320px;
+            overflow-y: auto;
+            padding: 1rem;
+            background: #f8fafc;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 0.8rem 1rem;
+            border-radius: 10px;
+            margin-bottom: 0.8rem;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+        }
+
+        .bot-message {
+            background: #e6fffa;
+            border-left: 3px solid #00a896;
+            color: #234;
+            margin-right: auto;
+        }
+
+        .user-message {
+            background: #0d253f;
+            color: white;
+            margin-left: auto;
+        }
+
+        .chat-form {
+            display: flex;
+            gap: 0.6rem;
+            padding: 1rem;
+            background: white;
             border-top: 1px solid #e2e8f0;
+        }
+
+        .chat-form input {
+            flex: 1;
+            min-width: 0;
+            padding: 0.85rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .chat-form input:focus {
+            border-color: #00a896;
+        }
+
+        .chat-form button {
+            padding: 0.85rem 1.2rem;
+            background: #00a896;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .chat-form button:hover {
+            background: #008f80;
+        }
+
+        .chat-form button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .chat-status {
+            padding: 0 1rem 0.8rem;
+            font-size: 0.8rem;
+            color: #718096;
+            background: white;
         }
 
         .btn-back {
@@ -88,36 +180,188 @@
         .btn-back:hover {
             color: #0d253f;
         }
+
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            font-size: 0.85rem;
+            color: #718096;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 1rem;
+                padding: 1.2rem;
+            }
+
+            .chat-form {
+                flex-direction: column;
+            }
+
+            .chat-form button {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 
 <body>
+
     <header>
         <h1>Flowtech</h1>
         <p>Central de Ajuda e Suporte Técnico</p>
     </header>
 
     <main class="container">
+
         <a href="/" class="btn-back">&larr; Voltar ao Sistema</a>
 
         <h2>Atendimento e Suporte</h2>
-        <p>Precisa de auxílio técnico ou encontrou alguma inconsistência no sistema? Nossa equipe técnica está
-            disponível para ajudar.</p>
+
+        <p>
+            Precisa de auxílio técnico ou encontrou alguma inconsistência no sistema?
+            Nossa equipe técnica está disponível para ajudar.
+        </p>
+
+        <h2>Assistente Virtual FlowTech</h2>
+
+        <p>
+            Converse com nosso assistente virtual para tirar dúvidas sobre
+            as funcionalidades e a utilização do sistema.
+        </p>
+
+        <section class="chat-box">
+
+            <div class="chat-header">
+                <h3>Chat de Suporte</h3>
+                <p>Assistente virtual FlowTech</p>
+            </div>
+
+            <div class="chat-messages" id="chatMessages" aria-live="polite">
+                <div class="message bot-message">
+                    Olá! Sou o assistente virtual do FlowTech.
+                    Como posso ajudar você hoje?
+                </div>
+            </div>
+
+            <form class="chat-form" id="chatForm">
+                <input
+                    type="text"
+                    id="userMessage"
+                    placeholder="Digite sua dúvida..."
+                    autocomplete="off"
+                    required
+                >
+
+                <button type="submit" id="sendButton">
+                    Enviar
+                </button>
+            </form>
+
+            <div class="chat-status" id="chatStatus">
+                Atendimento automático disponível.
+            </div>
+
+        </section>
 
         <h2>Canais de Atendimento</h2>
-        <p>Para dúvidas operacionais, relatos de inconsistências ou solicitações de treino no sistema, utilize os canais
-            abaixo:</p>
+
+        <p>
+            Para dúvidas operacionais, relatos de inconsistências ou
+            solicitações de treino no sistema, utilize os canais abaixo:
+        </p>
 
         <div class="contact-box">
             <p><strong>E-mail de Suporte:</strong> suporte@flowtech.local</p>
             <p><strong>Horário de Atendimento:</strong> Segunda a Sexta, das 08h às 18h</p>
             <p><strong>Tempo médio de resposta:</strong> Até 24 horas úteis</p>
         </div>
+
     </main>
 
     <footer>
-        &copy; 2026 Flowtech - Todos os direitos reservados. Projeto Acadêmico de Desenvolvimento de Sistemas.
+        &copy; 2026 Flowtech - Todos os direitos reservados.
+        Projeto Acadêmico de Desenvolvimento de Sistemas.
     </footer>
-</body>
 
+    <script>
+        const chatForm = document.getElementById("chatForm");
+        const userMessage = document.getElementById("userMessage");
+        const chatMessages = document.getElementById("chatMessages");
+        const sendButton = document.getElementById("sendButton");
+        const chatStatus = document.getElementById("chatStatus");
+
+        function addMessage(message, type) {
+            const messageElement = document.createElement("div");
+
+            messageElement.classList.add("message");
+            messageElement.classList.add(
+                type === "user" ? "user-message" : "bot-message"
+            );
+
+            messageElement.textContent = message;
+
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        chatForm.addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const mensagem = userMessage.value.trim();
+
+            if (!mensagem) {
+                return;
+            }
+
+            addMessage(mensagem, "user");
+
+            userMessage.value = "";
+            sendButton.disabled = true;
+            chatStatus.textContent = "O assistente está preparando uma resposta...";
+
+            try {
+                const response = await fetch("/chatbot/perguntar", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        mensagem: mensagem
+                    })
+                });
+
+                let data;
+
+            try {
+                data = await response.json();
+                    } catch {throw new Error("O servidor retornou uma resposta inválida.");}
+
+                if (!response.ok) {throw new Error(data.erro || "Não foi possível obter uma resposta.");}
+
+                addMessage(
+                    data.resposta || "Não consegui compreender sua dúvida.",
+                    "bot"
+                );
+
+                chatStatus.textContent = "Atendimento automático disponível.";
+
+            } catch (error) {
+                addMessage(
+                    "Não foi possível conectar ao assistente. Verifique se o servidor está funcionando e tente novamente.",
+                    "bot"
+                );
+
+                chatStatus.textContent = "Falha na comunicação com o servidor.";
+                console.error(error);
+
+            } finally {
+                sendButton.disabled = false;
+                userMessage.focus();
+            }
+        });
+    </script>
+
+</body>
 </html>
