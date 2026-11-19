@@ -15,6 +15,10 @@ from models.pedido_saida import PedidoSaida
 from models.sensor import Sensor
 from models.configuracao import Configuracao
 
+# relatorio 
+from datetime import datetime, date
+import unicodedata
+
 from chatbot.respostas import gerar_resposta
 
 # limpar nome de arquivos enviados por upload
@@ -1284,6 +1288,794 @@ def chatbot_perguntar():
         return jsonify({
             "erro": "Não foi possível gerar uma resposta."
         }), 500
+
+
+# ==========================================================
+# RELATÓRIOS FLOW TECH
+# INTEGRAÇÃO COM O BANCO DE DADOS MYSQL
+# ==========================================================
+
+from datetime import date, datetime
+
+
+# ----------------------------------------------------------
+# FUNÇÕES AUXILIARES
+# ----------------------------------------------------------
+
+def periodo_relatorios():
+    """Valida o período selecionado pelo usuário."""
+
+    hoje = date.today()
+
+    inicio_texto = request.args.get("inicio", "").strip()
+    fim_texto = request.args.get("fim", "").strip()
+
+    try:
+        fim = date.fromisoformat(fim_texto) if fim_texto else hoje
+
+        if inicio_texto:
+            inicio = date.fromisoformat(inicio_texto)
+        else:
+            indice_mes = hoje.year * 12 + hoje.month - 1 - 11
+            ano = indice_mes // 12
+            mes = indice_mes % 12 + 1
+            inicio = date(ano, mes, 1)
+
+    except ValueError:
+        raise ValueError("Informe um período válido.")
+
+    if inicio > fim:
+        raise ValueError(
+            "A data inicial não pode ser posterior à data final."
+        )
+
+    return inicio, fim
+
+
+def formatar_data_relatorio(valor, incluir_hora=True):
+    """Formata datas para exibição nos documentos."""
+
+    if valor is None:
+        return "—"
+
+    if isinstance(valor, datetime):
+        if incluir_hora:
+            return valor.strftime("%d/%m/%Y %H:%M")
+
+        return valor.strftime("%d/%m/%Y")
+
+    if isinstance(valor, date):
+        return valor.strftime("%d/%m/%Y")
+
+    return str(valor)
+
+
+def formatar_texto_relatorio(valor):
+    """Evita apresentar valores nulos nos documentos."""
+
+    if valor is None or valor == "":
+        return "—"
+
+    return str(valor)
+
+
+def consultar_relatorio(cursor, sql, parametros=()):
+    """Executa uma consulta e devolve os registros."""
+
+    cursor.execute(sql, parametros)
+
+    return cursor.fetchall()
+
+
+def gerar_lista_meses(inicio, fim):
+    """Gera a sequência mensal usada no gráfico."""
+
+    meses = []
+
+    ano = inicio.year
+    mes = inicio.month
+
+    while (ano, mes) <= (fim.year, fim.month):
+
+        meses.append((ano, mes))
+
+        mes += 1
+
+        if mes > 12:
+            mes = 1
+            ano += 1
+
+    return meses
+
+
+# ----------------------------------------------------------
+# TELA PRINCIPAL DE RELATÓRIOS
+# ----------------------------------------------------------
+
+@app.route("/relatorios")
+def relatorios():
+
+    if not session.get("funcionario_id"):
+        return redirect(url_for("login"))
+
+    try:
+        inicio, fim = periodo_relatorios()
+
+    except ValueError as erro:
+        flash(str(erro), "erro")
+        return redirect(url_for("relatorios"))
+
+    conexao = None
+    cursor = None
+
+    try:
+
+        conexao = obter_conexao()
+        cursor = conexao.cursor(dictionary=True)
+
+        # --------------------------------------------------
+        # TOTAL DE PEDIDOS DE ENTRADA
+        # --------------------------------------------------
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM pedido_entrada
+            WHERE data_hora >= %s
+              AND data_hora < %s
+        """, (
+            inicio,
+            datetime.combine(
+                date.fromordinal(fim.toordinal() + 1),
+                datetime.min.time()
+            )
+        ))
+
+        total_entradas = cursor.fetchone()["total"] or 0
+
+        # --------------------------------------------------
+        # TOTAL DE PEDIDOS DE SAÍDA
+        # --------------------------------------------------
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM pedido_saida
+            WHERE data_hora >= %s
+              AND data_hora < %s
+        """, (
+            inicio,
+            datetime.combine(
+                date.fromordinal(fim.toordinal() + 1),
+                datetime.min.time()
+            )
+        ))
+
+        total_saidas = cursor.fetchone()["total"] or 0
+
+        # --------------------------------------------------
+        # TOTAL DE PRODUTOS
+        # --------------------------------------------------
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM produto
+        """)
+
+        total_produtos = cursor.fetchone()["total"] or 0
+
+        # --------------------------------------------------
+        # TOTAL DE FORNECEDORES
+        # --------------------------------------------------
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM fornecedor
+        """)
+
+        total_fornecedores = cursor.fetchone()["total"] or 0
+
+        # --------------------------------------------------
+        # TOTAL DE FUNCIONÁRIOS
+        # --------------------------------------------------
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM funcionario
+        """)
+
+        total_funcionarios = cursor.fetchone()["total"] or 0
+
+        # --------------------------------------------------
+        # QUANTIDADE DE PRODUTOS QUE ENTRARAM POR MÊS
+        # --------------------------------------------------
+
+        entradas_mes = consultar_relatorio(
+            cursor,
+            """
+            SELECT
+                DATE_FORMAT(pe.data_hora, '%Y-%m') AS mes,
+                COALESCE(SUM(ipe.quantidade), 0) AS total
+
+            FROM pedido_entrada AS pe
+
+            LEFT JOIN itempedido_entrada AS ipe
+                ON ipe.pedido_entrada_id = pe.pedido_entrada_id
+
+            WHERE pe.data_hora >= %s
+              AND pe.data_hora < %s
+
+            GROUP BY DATE_FORMAT(pe.data_hora, '%Y-%m')
+
+            ORDER BY mes
+            """,
+            (
+                inicio,
+                datetime.combine(
+                    date.fromordinal(fim.toordinal() + 1),
+                    datetime.min.time()
+                )
+            )
+        )
+
+        # --------------------------------------------------
+        # QUANTIDADE DE PRODUTOS QUE SAÍRAM POR MÊS
+        # --------------------------------------------------
+
+        saidas_mes = consultar_relatorio(
+            cursor,
+            """
+            SELECT
+                DATE_FORMAT(ps.data_hora, '%Y-%m') AS mes,
+                COALESCE(SUM(ips.quantidade), 0) AS total
+
+            FROM pedido_saida AS ps
+
+            LEFT JOIN itempedido_saida AS ips
+                ON ips.pedido_saida_id = ps.pedido_saida_id
+
+            WHERE ps.data_hora >= %s
+              AND ps.data_hora < %s
+
+            GROUP BY DATE_FORMAT(ps.data_hora, '%Y-%m')
+
+            ORDER BY mes
+            """,
+            (
+                inicio,
+                datetime.combine(
+                    date.fromordinal(fim.toordinal() + 1),
+                    datetime.min.time()
+                )
+            )
+        )
+
+        # --------------------------------------------------
+        # ORGANIZAÇÃO DOS DADOS DO GRÁFICO
+        # --------------------------------------------------
+
+        mapa_entradas = {
+            item["mes"]: int(item["total"] or 0)
+            for item in entradas_mes
+        }
+
+        mapa_saidas = {
+            item["mes"]: int(item["total"] or 0)
+            for item in saidas_mes
+        }
+
+        meses = gerar_lista_meses(inicio, fim)
+
+        nomes_meses = [
+            "Jan", "Fev", "Mar", "Abr",
+            "Mai", "Jun", "Jul", "Ago",
+            "Set", "Out", "Nov", "Dez"
+        ]
+
+        labels = []
+        valores_entrada = []
+        valores_saida = []
+
+        for ano, mes in meses:
+
+            chave = f"{ano:04d}-{mes:02d}"
+
+            labels.append(
+                f"{nomes_meses[mes - 1]}/{str(ano)[2:]}"
+            )
+
+            valores_entrada.append(
+                mapa_entradas.get(chave, 0)
+            )
+
+            valores_saida.append(
+                mapa_saidas.get(chave, 0)
+            )
+
+        grafico = {
+            "labels": labels,
+            "entradas": valores_entrada,
+            "saidas": valores_saida
+        }
+
+        # --------------------------------------------------
+        # ENVIO DOS DADOS PARA O HTML
+        # --------------------------------------------------
+
+        return render_template(
+            "relatorio.html",
+
+            total_entradas=total_entradas,
+            total_saidas=total_saidas,
+
+            total_produtos=total_produtos,
+            total_fornecedores=total_fornecedores,
+            total_funcionarios=total_funcionarios,
+
+            grafico=grafico,
+
+            inicio=inicio.isoformat(),
+            fim=fim.isoformat(),
+
+            inicio_br=inicio.strftime("%d/%m/%Y"),
+            fim_br=fim.strftime("%d/%m/%Y"),
+
+            erros=[]
+        )
+
+    except Exception as erro:
+
+        print("ERRO NA TELA DE RELATÓRIOS:", erro)
+
+        flash(
+            "Não foi possível carregar os relatórios. "
+            "Verifique a conexão com o banco de dados.",
+            "erro"
+        )
+
+        return redirect(url_for("dashboard"))
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conexao:
+            conexao.close()
+
+
+# ----------------------------------------------------------
+# GERAÇÃO DOS DOCUMENTOS
+# ----------------------------------------------------------
+
+@app.route("/relatorios/documento/<tipo>")
+def gerar_relatorio_documento(tipo):
+
+    if not session.get("funcionario_id"):
+        return redirect(url_for("login"))
+
+    titulos = {
+        "entradas": "Relatório de Entradas de Produtos",
+        "saidas": "Relatório de Saídas de Produtos",
+        "produtos": "Relatório de Produtos Cadastrados",
+        "fornecedores": "Relatório de Fornecedores Cadastrados",
+        "funcionarios": "Relatório de Funcionários Cadastrados"
+    }
+
+    if tipo not in titulos:
+        flash("Tipo de relatório inválido.", "erro")
+        return redirect(url_for("relatorios"))
+
+    try:
+        inicio, fim = periodo_relatorios()
+
+    except ValueError as erro:
+        flash(str(erro), "erro")
+        return redirect(url_for("relatorios"))
+
+    conexao = None
+    cursor = None
+
+    try:
+
+        conexao = obter_conexao()
+        cursor = conexao.cursor(dictionary=True)
+
+        fim_exclusivo = datetime.combine(
+            date.fromordinal(fim.toordinal() + 1),
+            datetime.min.time()
+        )
+
+        # ==================================================
+        # RELATÓRIO DE ENTRADAS
+        # ==================================================
+
+        if tipo == "entradas":
+
+            registros = consultar_relatorio(
+                cursor,
+                """
+                SELECT
+                    pe.pedido_entrada_id,
+                    pe.data_hora,
+
+                    p.nome AS produto,
+
+                    ipe.quantidade,
+
+                    f.nome AS fornecedor,
+
+                    fun.nome AS funcionario,
+
+                    pe.status_pedido,
+                    pe.descricao,
+                    pe.rfid
+
+                FROM pedido_entrada AS pe
+
+                LEFT JOIN itempedido_entrada AS ipe
+                    ON ipe.pedido_entrada_id = pe.pedido_entrada_id
+
+                LEFT JOIN produto AS p
+                    ON p.produto_id = ipe.produto_id
+
+                LEFT JOIN fornecedor AS f
+                    ON f.fornecedor_id = pe.fornecedor_id
+
+                LEFT JOIN funcionario AS fun
+                    ON fun.funcionario_id = pe.funcionario_id
+
+                WHERE pe.data_hora >= %s
+                  AND pe.data_hora < %s
+
+                ORDER BY
+                    pe.data_hora DESC,
+                    pe.pedido_entrada_id DESC
+                """,
+                (inicio, fim_exclusivo)
+            )
+
+            colunas = [
+                "Pedido",
+                "Data e hora",
+                "Produto",
+                "Quantidade",
+                "Fornecedor",
+                "Funcionário",
+                "Status",
+                "Descrição",
+                "RFID"
+            ]
+
+            linhas = [
+                [
+                    formatar_texto_relatorio(r["pedido_entrada_id"]),
+                    formatar_data_relatorio(r["data_hora"]),
+                    formatar_texto_relatorio(r["produto"]),
+                    formatar_texto_relatorio(r["quantidade"]),
+                    formatar_texto_relatorio(r["fornecedor"]),
+                    formatar_texto_relatorio(r["funcionario"]),
+                    formatar_texto_relatorio(r["status_pedido"]),
+                    formatar_texto_relatorio(r["descricao"]),
+                    formatar_texto_relatorio(r["rfid"])
+                ]
+                for r in registros
+            ]
+
+            periodo = (
+                f"{inicio.strftime('%d/%m/%Y')} até "
+                f"{fim.strftime('%d/%m/%Y')}"
+            )
+
+        # ==================================================
+        # RELATÓRIO DE SAÍDAS
+        # ==================================================
+
+        elif tipo == "saidas":
+
+            registros = consultar_relatorio(
+                cursor,
+                """
+                SELECT
+                    ps.pedido_saida_id,
+                    ps.data_hora,
+
+                    p.nome AS produto,
+
+                    ips.quantidade,
+
+                    c.nome AS cliente,
+
+                    fun.nome AS funcionario,
+
+                    ps.status_pedido,
+                    ps.descricao
+
+                FROM pedido_saida AS ps
+
+                LEFT JOIN itempedido_saida AS ips
+                    ON ips.pedido_saida_id = ps.pedido_saida_id
+
+                LEFT JOIN produto AS p
+                    ON p.produto_id = ips.produto_id
+
+                LEFT JOIN cliente AS c
+                    ON c.cliente_id = ps.cliente_id
+
+                LEFT JOIN funcionario AS fun
+                    ON fun.funcionario_id = ps.funcionario_id
+
+                WHERE ps.data_hora >= %s
+                  AND ps.data_hora < %s
+
+                ORDER BY
+                    ps.data_hora DESC,
+                    ps.pedido_saida_id DESC
+                """,
+                (inicio, fim_exclusivo)
+            )
+
+            colunas = [
+                "Pedido",
+                "Data e hora",
+                "Produto",
+                "Quantidade",
+                "Cliente",
+                "Funcionário",
+                "Status",
+                "Descrição"
+            ]
+
+            linhas = [
+                [
+                    formatar_texto_relatorio(r["pedido_saida_id"]),
+                    formatar_data_relatorio(r["data_hora"]),
+                    formatar_texto_relatorio(r["produto"]),
+                    formatar_texto_relatorio(r["quantidade"]),
+                    formatar_texto_relatorio(r["cliente"]),
+                    formatar_texto_relatorio(r["funcionario"]),
+                    formatar_texto_relatorio(r["status_pedido"]),
+                    formatar_texto_relatorio(r["descricao"])
+                ]
+                for r in registros
+            ]
+
+            periodo = (
+                f"{inicio.strftime('%d/%m/%Y')} até "
+                f"{fim.strftime('%d/%m/%Y')}"
+            )
+
+        # ==================================================
+        # RELATÓRIO DE PRODUTOS
+        # ==================================================
+
+        elif tipo == "produtos":
+
+            registros = consultar_relatorio(
+                cursor,
+                """
+                SELECT
+                    p.produto_id,
+                    p.nome,
+                    p.categoria,
+                    p.tipo_produto,
+
+                    COALESCE(e.quantidade_atual, 0)
+                        AS quantidade_atual,
+
+                    p.estoque_minimo,
+                    p.lote,
+                    p.validade,
+                    p.localizacao,
+                    p.fornecedor,
+                    p.RFID
+
+                FROM produto AS p
+
+                LEFT JOIN (
+                    SELECT
+                        produto_id,
+                        SUM(quantidade) AS quantidade_atual
+
+                    FROM estoque
+
+                    GROUP BY produto_id
+
+                ) AS e
+                    ON e.produto_id = p.produto_id
+
+                ORDER BY p.nome ASC
+                """
+            )
+
+            colunas = [
+                "ID",
+                "Produto",
+                "Categoria",
+                "Tipo",
+                "Estoque atual",
+                "Estoque mínimo",
+                "Lote",
+                "Validade",
+                "Localização",
+                "Fornecedor",
+                "RFID"
+            ]
+
+            linhas = [
+                [
+                    formatar_texto_relatorio(r["produto_id"]),
+                    formatar_texto_relatorio(r["nome"]),
+                    formatar_texto_relatorio(r["categoria"]),
+                    formatar_texto_relatorio(r["tipo_produto"]),
+                    formatar_texto_relatorio(r["quantidade_atual"]),
+                    formatar_texto_relatorio(r["estoque_minimo"]),
+                    formatar_texto_relatorio(r["lote"]),
+                    formatar_data_relatorio(
+                        r["validade"],
+                        incluir_hora=False
+                    ),
+                    formatar_texto_relatorio(r["localizacao"]),
+                    formatar_texto_relatorio(r["fornecedor"]),
+                    formatar_texto_relatorio(r["RFID"])
+                ]
+                for r in registros
+            ]
+
+            periodo = "Todos os produtos cadastrados"
+
+        # ==================================================
+        # RELATÓRIO DE FORNECEDORES
+        # ==================================================
+
+        elif tipo == "fornecedores":
+
+            registros = consultar_relatorio(
+                cursor,
+                """
+                SELECT
+                    fornecedor_id,
+                    nome,
+                    CNPJ,
+                    e_mail,
+                    telefone,
+                    endereco
+
+                FROM fornecedor
+
+                ORDER BY nome ASC
+                """
+            )
+
+            colunas = [
+                "ID",
+                "Fornecedor",
+                "CNPJ",
+                "E-mail",
+                "Telefone",
+                "Endereço"
+            ]
+
+            linhas = [
+                [
+                    formatar_texto_relatorio(r["fornecedor_id"]),
+                    formatar_texto_relatorio(r["nome"]),
+                    formatar_texto_relatorio(r["CNPJ"]),
+                    formatar_texto_relatorio(r["e_mail"]),
+                    formatar_texto_relatorio(r["telefone"]),
+                    formatar_texto_relatorio(r["endereco"])
+                ]
+                for r in registros
+            ]
+
+            periodo = "Todos os fornecedores cadastrados"
+
+        # ==================================================
+        # RELATÓRIO DE FUNCIONÁRIOS
+        # ==================================================
+
+        else:
+
+            registros = consultar_relatorio(
+                cursor,
+                """
+                SELECT
+                    funcionario_id,
+                    nome,
+                    e_mail,
+                    setor,
+                    cargo,
+                    turno,
+                    telefone
+
+                FROM funcionario
+
+                ORDER BY nome ASC
+                """
+            )
+
+            colunas = [
+                "ID",
+                "Funcionário",
+                "E-mail",
+                "Setor",
+                "Cargo",
+                "Turno",
+                "Telefone"
+            ]
+
+            linhas = [
+                [
+                    formatar_texto_relatorio(r["funcionario_id"]),
+                    formatar_texto_relatorio(r["nome"]),
+                    formatar_texto_relatorio(r["e_mail"]),
+                    formatar_texto_relatorio(r["setor"]),
+                    formatar_texto_relatorio(r["cargo"]),
+                    formatar_texto_relatorio(r["turno"]),
+                    formatar_texto_relatorio(r["telefone"])
+                ]
+                for r in registros
+            ]
+
+            periodo = "Todos os funcionários cadastrados"
+
+        # ==================================================
+        # ENVIA OS DADOS PARA A FOLHA DO DOCUMENTO
+        # ==================================================
+
+        return render_template(
+            "documento_relatorio.html",
+
+            titulo=titulos[tipo],
+            tipo=tipo,
+
+            colunas=colunas,
+            linhas=linhas,
+
+            total_registros=len(linhas),
+
+            gerado_em=datetime.now().strftime(
+                "%d/%m/%Y às %H:%M"
+            ),
+
+            periodo=periodo,
+
+            inicio=inicio.isoformat(),
+            fim=fim.isoformat(),
+
+            erro_documento=None
+        )
+
+    
+    except Exception as erro:
+
+        app.logger.exception(
+            "ERRO AO GERAR DOCUMENTO: %s",
+            tipo
+        )
+
+        flash(
+            f"Erro ao gerar documento: {erro}",
+            "erro"
+        )
+
+        return redirect(
+            url_for(
+                "relatorios",
+                inicio=inicio.isoformat(),
+                fim=fim.isoformat()
+            )
+        )
+
+    finally:
+
+        if cursor is not None:
+            cursor.close()
+
+        if conexao is not None:
+            conexao.close()
+
+
+
+
 
 
 if __name__ == "__main__":

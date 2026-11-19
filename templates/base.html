@@ -671,6 +671,10 @@
                     {% if config and config.idioma == 'en-US' %}Sensors{% else %}Sensores{% endif %}
                 </span>
             </a>
+            <a href="{{ url_for('relatorios') }}">
+                <i class="bi bi-file-earmark-bar-graph"></i>
+                <span>Relatórios</span>
+            </a>
 
         </nav>
     </aside>
@@ -893,6 +897,8 @@
                 ultimoTextoLido = "";
             });
         });
+
+        
     </script>
 
 </body>

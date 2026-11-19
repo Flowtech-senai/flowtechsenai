@@ -1,0 +1,732 @@
+
+{% extends "base.html" %}
+
+{% block conteudo %}
+
+<style>
+    .relatorios-container {
+        padding-bottom: 35px;
+    }
+
+    .titulo-modulo {
+        color: #007E83;
+        font-weight: 700;
+        margin-bottom: 7px;
+    }
+
+    .subtitulo-modulo {
+        color: #6c757d;
+        margin-bottom: 25px;
+    }
+
+    .card-relatorio,
+    .filtro-card,
+    .grafico-card,
+    .documento-card {
+        background: #fff;
+        border: 1px solid #e6eeee;
+        border-radius: 14px;
+    }
+
+    .card-relatorio {
+        padding: 19px;
+        height: 100%;
+    }
+
+    .indicador {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .indicador-icone,
+    .documento-icone {
+        width: 48px;
+        height: 48px;
+        flex: 0 0 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #007E83;
+        background: #e8f4f4;
+        font-size: 22px;
+    }
+
+    .indicador-titulo {
+        color: #6c757d;
+        font-size: 13px;
+        margin: 0 0 4px;
+    }
+
+    .indicador-valor {
+        color: #243438;
+        font-size: 25px;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .secao-titulo {
+        color: #26383b;
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 14px;
+    }
+
+    .filtro-card,
+    .grafico-card {
+        padding: 21px;
+    }
+
+    .grafico-area {
+        position: relative;
+        height: 310px;
+        width: 100%;
+    }
+
+    .form-label {
+        color: #47575b;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .form-control {
+        min-height: 42px;
+        border-radius: 8px;
+    }
+
+    .btn-flow,
+    .btn-outline-flow {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 40px;
+        padding: 8px 15px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .btn-flow {
+        color: #fff;
+        background: #007E83;
+        border: 1px solid #007E83;
+    }
+
+    .btn-flow:hover {
+        color: #fff;
+        background: #00666a;
+        border-color: #00666a;
+    }
+
+    .btn-outline-flow {
+        color: #007E83;
+        background: #fff;
+        border: 1px solid #007E83;
+    }
+
+    .btn-outline-flow:hover {
+        color: #00666a;
+        background: #e8f4f4;
+    }
+
+    .documento-card {
+        padding: 21px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .documento-icone {
+        margin-bottom: 14px;
+    }
+
+    .documento-card h5 {
+        color: #26383b;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .documento-card p {
+        color: #707d81;
+        font-size: 13px;
+        line-height: 1.6;
+        flex-grow: 1;
+    }
+
+    .documento-card .btn {
+        margin-top: 10px;
+    }
+
+    .observacao-grafico {
+        color: #788387;
+        font-size: 12px;
+        margin-top: 12px;
+    }
+
+    @media (max-width: 768px) {
+        .grafico-area {
+            height: 250px;
+        }
+
+        .indicador-valor {
+            font-size: 22px;
+        }
+    }
+</style>
+
+<div class="container-fluid relatorios-container">
+
+    <!-- CABEÇALHO -->
+    <div class="mb-4">
+        <h2 class="titulo-modulo">Relatórios</h2>
+
+        <p class="subtitulo-modulo">
+            Consulte as movimentações e gere documentos
+            dos cadastros do Flow Tech.
+        </p>
+    </div>
+
+    <!-- MENSAGENS DO SISTEMA -->
+    {% with mensagens = get_flashed_messages(with_categories=true) %}
+
+        {% if mensagens %}
+
+            {% for categoria, mensagem in mensagens %}
+
+                <div class="alert alert-{{ 'danger' if categoria in ['erro', 'danger'] else 'success' if categoria in ['sucesso', 'success'] else 'warning' }} alert-dismissible fade show">
+
+                    {{ mensagem }}
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                        aria-label="Fechar">
+                    </button>
+
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+    {% endwith %}
+
+    <!-- INDICADORES -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-12 col-sm-6 col-xl">
+            <div class="card-relatorio">
+                <div class="indicador">
+
+                    <div class="indicador-icone">
+                        <i class="bi bi-box-arrow-in-down"></i>
+                    </div>
+
+                    <div>
+                        <p class="indicador-titulo">
+                            Pedidos de entrada
+                        </p>
+
+                        <h3 class="indicador-valor">
+                            {{ total_entradas }}
+                        </h3>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl">
+            <div class="card-relatorio">
+                <div class="indicador">
+
+                    <div class="indicador-icone">
+                        <i class="bi bi-box-arrow-up"></i>
+                    </div>
+
+                    <div>
+                        <p class="indicador-titulo">
+                            Pedidos de saída
+                        </p>
+
+                        <h3 class="indicador-valor">
+                            {{ total_saidas }}
+                        </h3>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl">
+            <div class="card-relatorio">
+                <div class="indicador">
+
+                    <div class="indicador-icone">
+                        <i class="bi bi-capsule"></i>
+                    </div>
+
+                    <div>
+                        <p class="indicador-titulo">
+                            Produtos cadastrados
+                        </p>
+
+                        <h3 class="indicador-valor">
+                            {{ total_produtos }}
+                        </h3>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl">
+            <div class="card-relatorio">
+                <div class="indicador">
+
+                    <div class="indicador-icone">
+                        <i class="bi bi-truck"></i>
+                    </div>
+
+                    <div>
+                        <p class="indicador-titulo">
+                            Fornecedores
+                        </p>
+
+                        <h3 class="indicador-valor">
+                            {{ total_fornecedores }}
+                        </h3>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl">
+            <div class="card-relatorio">
+                <div class="indicador">
+
+                    <div class="indicador-icone">
+                        <i class="bi bi-person-badge"></i>
+                    </div>
+
+                    <div>
+                        <p class="indicador-titulo">
+                            Funcionários
+                        </p>
+
+                        <h3 class="indicador-valor">
+                            {{ total_funcionarios }}
+                        </h3>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FILTRO DE DATAS -->
+    <div class="filtro-card mb-4">
+
+        <h5 class="secao-titulo">
+            <i class="bi bi-calendar-range me-2"></i>
+            Filtrar movimentações
+        </h5>
+
+        <form method="GET" action="{{ url_for('relatorios') }}">
+
+            <div class="row g-3 align-items-end">
+
+                <div class="col-12 col-md-4">
+
+                    <label for="inicio" class="form-label">
+                        Data inicial
+                    </label>
+
+                    <input
+                        id="inicio"
+                        type="date"
+                        name="inicio"
+                        class="form-control"
+                        value="{{ inicio }}"
+                        required
+                    >
+
+                </div>
+
+                <div class="col-12 col-md-4">
+
+                    <label for="fim" class="form-label">
+                        Data final
+                    </label>
+
+                    <input
+                        id="fim"
+                        type="date"
+                        name="fim"
+                        class="form-control"
+                        value="{{ fim }}"
+                        required
+                    >
+
+                </div>
+
+                <div class="col-12 col-md-4 d-flex flex-wrap gap-2">
+
+                    <button type="submit" class="btn-flow">
+                        <i class="bi bi-funnel"></i>
+                        Aplicar filtro
+                    </button>
+
+                    <a
+                        href="{{ url_for('relatorios') }}"
+                        class="btn-outline-flow">
+                        Limpar
+                    </a>
+
+                </div>
+
+            </div>
+
+            <small class="text-muted d-block mt-3">
+                O período selecionado filtra os pedidos e o gráfico.
+                Os relatórios de produtos, fornecedores e funcionários
+                exibem todos os cadastros.
+            </small>
+
+        </form>
+
+    </div>
+
+    <!-- GRÁFICO -->
+    <div class="grafico-card mb-4">
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+
+            <div>
+
+                <h5 class="secao-titulo mb-1">
+                    Entradas e saídas de produtos
+                </h5>
+
+                <small class="text-muted">
+                    Quantidade de unidades movimentadas por mês
+                </small>
+
+            </div>
+
+            <span class="badge bg-light text-dark border">
+                {{ inicio_br }} a {{ fim_br }}
+            </span>
+
+        </div>
+
+        <div class="grafico-area">
+            <canvas
+                id="graficoMovimentacoes"
+                aria-label="Gráfico mensal de unidades que entraram e saíram"
+                role="img">
+            </canvas>
+        </div>
+
+        <p class="observacao-grafico mb-0">
+            O gráfico soma as quantidades registradas nas tabelas
+            itempedido_entrada e itempedido_saida.
+            Pedidos sem itens associados não acrescentam unidades ao gráfico.
+        </p>
+
+    </div>
+
+    <!-- DOCUMENTOS -->
+    <div class="mb-3">
+
+        <h5 class="secao-titulo">
+            <i class="bi bi-file-earmark-text me-2"></i>
+            Documentos disponíveis
+        </h5>
+
+        <p class="text-muted small">
+            Cada documento é montado com os registros atuais
+            do banco de dados e pode ser impresso ou salvo em PDF.
+        </p>
+
+    </div>
+
+    <div class="row g-3">
+
+        <!-- ENTRADAS -->
+        <div class="col-12 col-md-6 col-xl-4">
+
+            <div class="documento-card">
+
+                <div class="documento-icone">
+                    <i class="bi bi-box-arrow-in-down"></i>
+                </div>
+
+                <h5>Relatório de entradas</h5>
+
+                <p>
+                    Pedidos de entrada com data, produto, quantidade,
+                    fornecedor, funcionário, status e descrição.
+                </p>
+
+                <a
+                    class="btn-flow"
+                    href="{{ url_for(
+                        'gerar_relatorio_documento',
+                        tipo='entradas',
+                        inicio=inicio,
+                        fim=fim
+                    ) }}">
+
+                    <i class="bi bi-file-earmark-text"></i>
+                    Gerar documento
+
+                </a>
+
+            </div>
+
+        </div>
+
+        <!-- SAÍDAS -->
+        <div class="col-12 col-md-6 col-xl-4">
+
+            <div class="documento-card">
+
+                <div class="documento-icone">
+                    <i class="bi bi-box-arrow-up"></i>
+                </div>
+
+                <h5>Relatório de saídas</h5>
+
+                <p>
+                    Pedidos de saída com data, produto, quantidade,
+                    cliente, funcionário, status e descrição.
+                </p>
+
+                <a
+                    class="btn-flow"
+                    href="{{ url_for(
+                        'gerar_relatorio_documento',
+                        tipo='saidas',
+                        inicio=inicio,
+                        fim=fim
+                    ) }}">
+
+                    <i class="bi bi-file-earmark-text"></i>
+                    Gerar documento
+
+                </a>
+
+            </div>
+
+        </div>
+
+        <!-- PRODUTOS -->
+        <div class="col-12 col-md-6 col-xl-4">
+
+            <div class="documento-card">
+
+                <div class="documento-icone">
+                    <i class="bi bi-capsule"></i>
+                </div>
+
+                <h5>Cadastro de produtos</h5>
+
+                <p>
+                    Produtos cadastrados, categoria, tipo, estoque atual,
+                    estoque mínimo, lote, validade, localização e fornecedor.
+                </p>
+
+                <a
+                    class="btn-flow"
+                    href="{{ url_for(
+                        'gerar_relatorio_documento',
+                        tipo='produtos'
+                    ) }}">
+
+                    <i class="bi bi-file-earmark-text"></i>
+                    Gerar documento
+
+                </a>
+
+            </div>
+
+        </div>
+
+        <!-- FORNECEDORES -->
+        <div class="col-12 col-md-6 col-xl-4">
+
+            <div class="documento-card">
+
+                <div class="documento-icone">
+                    <i class="bi bi-truck"></i>
+                </div>
+
+                <h5>Cadastro de fornecedores</h5>
+
+                <p>
+                    Fornecedores cadastrados, CNPJ, e-mail,
+                    telefone e endereço.
+                </p>
+
+                <a
+                    class="btn-flow"
+                    href="{{ url_for(
+                        'gerar_relatorio_documento',
+                        tipo='fornecedores'
+                    ) }}">
+
+                    <i class="bi bi-file-earmark-text"></i>
+                    Gerar documento
+
+                </a>
+
+            </div>
+
+        </div>
+
+        <!-- FUNCIONÁRIOS -->
+        <div class="col-12 col-md-6 col-xl-4">
+
+            <div class="documento-card">
+
+                <div class="documento-icone">
+                    <i class="bi bi-person-vcard"></i>
+                </div>
+
+                <h5>Cadastro de funcionários</h5>
+
+                <p>
+                    Funcionários cadastrados, nome, e-mail,
+                    setor, cargo, turno e telefone.
+                </p>
+
+                <a
+                    class="btn-flow"
+                    href="{{ url_for(
+                        'gerar_relatorio_documento',
+                        tipo='funcionarios'
+                    ) }}">
+
+                    <i class="bi bi-file-earmark-text"></i>
+                    Gerar documento
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- BIBLIOTECA DO GRÁFICO -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const canvas = document.getElementById("graficoMovimentacoes");
+
+    if (!canvas || typeof Chart === "undefined") {
+        return;
+    }
+
+    const dados = { grafico , tojson }
+
+    new Chart(canvas, {
+
+        type: "bar",
+
+        data: {
+
+            labels: dados.labels,
+
+            datasets: [
+
+                {
+                    label: "Entradas",
+                    data: dados.entradas,
+                    backgroundColor: "#007E83",
+                    borderRadius: 5,
+                    maxBarThickness: 38
+                },
+
+                {
+                    label: "Saídas",
+                    data: dados.saidas,
+                    backgroundColor: "#8B9A9D",
+                    borderRadius: 5,
+                    maxBarThickness: 38
+                }
+
+            ]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            interaction: {
+                intersect: false,
+                mode: "index"
+            },
+
+            plugins: {
+
+                legend: {
+                    position: "bottom",
+
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                }
+
+            },
+
+            scales: {
+
+                y: {
+                    beginAtZero: true,
+
+                    title: {
+                        display: true,
+                        text: "Unidades movimentadas"
+                    },
+
+                    ticks: {
+                        precision: 0
+                    },
+
+                    grid: {
+                        color: "#edf1f1"
+                    }
+                },
+
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+
+            }
+
+        }
+
+    });
+
+});
+</script>
+
+{% endblock %}

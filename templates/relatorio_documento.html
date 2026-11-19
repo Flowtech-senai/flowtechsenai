@@ -1,0 +1,525 @@
+
+{% extends "base.html" %}
+
+{% block conteudo %}
+
+<style>
+
+    .pagina-relatorio {
+        padding-bottom: 30px;
+    }
+
+    .acoes-documento {
+        max-width: 1150px;
+        margin: 0 auto 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .btn-voltar-documento,
+    .btn-imprimir-documento {
+        border-radius: 8px;
+        padding: 9px 16px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .btn-voltar-documento {
+        color: #007E83;
+        background: #fff;
+        border: 1px solid #007E83;
+    }
+
+    .btn-voltar-documento:hover {
+        color: #00666a;
+        background: #e8f4f4;
+    }
+
+    .btn-imprimir-documento {
+        color: #fff;
+        background: #007E83;
+        border: 1px solid #007E83;
+        cursor: pointer;
+    }
+
+    .btn-imprimir-documento:hover {
+        color: #fff;
+        background: #00666a;
+    }
+
+    .documento-papel {
+        width: 100%;
+        max-width: 1150px;
+        margin: 0 auto;
+        padding: 38px;
+        background: #fff;
+        border: 1px solid #e2e8e8;
+        border-radius: 5px;
+        box-shadow: 0 3px 15px rgba(0,0,0,.05);
+    }
+
+    .documento-cabecalho {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        padding-bottom: 17px;
+        border-bottom: 3px solid #007E83;
+    }
+
+    .marca-documento {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .marca-icone {
+        width: 46px;
+        height: 46px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        color: #fff;
+        background: #007E83;
+        font-size: 24px;
+    }
+
+    .marca-documento h3 {
+        margin: 0;
+        color: #007E83;
+        font-size: 21px;
+        font-weight: 800;
+    }
+
+    .marca-documento small {
+        color: #6c757d;
+        font-size: 10px;
+        letter-spacing: 1px;
+    }
+
+    .identificacao-documento {
+        color: #657276;
+        text-align: right;
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    .documento-titulo {
+        margin: 27px 0 22px;
+        text-align: center;
+    }
+
+    .documento-titulo h2 {
+        color: #26383b;
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 7px;
+    }
+
+    .documento-titulo p {
+        color: #788387;
+        font-size: 12px;
+        margin: 0;
+    }
+
+    .informacoes-documento {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 24px;
+    }
+
+    .informacao-item {
+        padding: 11px 13px;
+        background: #f5f8f8;
+        border: 1px solid #e5eeee;
+        border-radius: 7px;
+    }
+
+    .informacao-item small {
+        display: block;
+        color: #788589;
+        font-size: 10px;
+        margin-bottom: 4px;
+    }
+
+    .informacao-item strong {
+        color: #35464a;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .titulo-tabela {
+        color: #26383b;
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .tabela-documento {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11px;
+    }
+
+    .tabela-documento thead {
+        color: #fff;
+        background: #007E83;
+    }
+
+    .tabela-documento th {
+        padding: 9px 7px;
+        text-align: left;
+        font-weight: 600;
+        border: 1px solid #007E83;
+    }
+
+    .tabela-documento td {
+        padding: 8px 7px;
+        border: 1px solid #dce4e4;
+        color: #425256;
+        vertical-align: top;
+        overflow-wrap: anywhere;
+    }
+
+    .tabela-documento tbody tr:nth-child(even) {
+        background: #f5f8f8;
+    }
+
+    .mensagem-vazia {
+        border: 1px dashed #cbd6d6;
+        border-radius: 8px;
+        padding: 30px 15px;
+        text-align: center;
+        color: #778589;
+        font-size: 13px;
+    }
+
+    .documento-rodape {
+        margin-top: 28px;
+        padding-top: 13px;
+        border-top: 1px solid #dce4e4;
+        text-align: center;
+        color: #879296;
+        font-size: 10px;
+    }
+
+    .documento-rodape strong {
+        color: #007E83;
+    }
+
+    @media (max-width: 768px) {
+
+        .documento-papel {
+            padding: 18px;
+            overflow-x: auto;
+        }
+
+        .informacoes-documento {
+            grid-template-columns: 1fr;
+        }
+
+        .tabela-documento {
+            min-width: 760px;
+        }
+
+        .documento-cabecalho {
+            align-items: flex-start;
+        }
+
+    }
+
+    /* CONFIGURAÇÃO DE IMPRESSÃO */
+    @media print {
+
+        @page {
+            size: A4 landscape;
+            margin: 12mm;
+        }
+
+        body {
+            background: #fff !important;
+        }
+
+        body * {
+            visibility: hidden !important;
+        }
+
+        #area-impressao,
+        #area-impressao * {
+            visibility: visible !important;
+        }
+
+        #area-impressao {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: 0 !important;
+            box-shadow: none !important;
+        }
+
+        .acoes-documento {
+            display: none !important;
+        }
+
+        .tabela-documento {
+            font-size: 8px;
+        }
+
+        .tabela-documento th,
+        .tabela-documento td {
+            padding: 5px;
+        }
+
+        .tabela-documento thead {
+            display: table-header-group;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .tabela-documento tr {
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        .informacao-item,
+        .documento-cabecalho,
+        .documento-rodape {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+    }
+
+</style>
+
+
+<div class="container-fluid pagina-relatorio">
+
+    <!-- BOTÕES DE AÇÃO -->
+    <div class="acoes-documento">
+
+        <a
+            href="{{ url_for(
+                'relatorios',
+                inicio=inicio,
+                fim=fim
+            ) }}"
+            class="btn-voltar-documento">
+
+            <i class="bi bi-arrow-left me-1"></i>
+            Voltar aos relatórios
+
+        </a>
+
+        <button
+            type="button"
+            class="btn-imprimir-documento"
+            onclick="window.print()">
+
+            <i class="bi bi-printer me-1"></i>
+            Imprimir / Salvar PDF
+
+        </button>
+
+    </div>
+
+
+    {% if erro_documento %}
+
+        <div class="alert alert-warning">
+            {{ erro_documento }}
+        </div>
+
+    {% endif %}
+
+
+    <!-- DOCUMENTO QUE SERÁ IMPRESSO -->
+    <section
+        id="area-impressao"
+        class="documento-papel">
+
+
+        <!-- CABEÇALHO -->
+        <header class="documento-cabecalho">
+
+            <div class="marca-documento">
+
+                <div class="marca-icone">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+
+                <div>
+                    <h3>FLOW TECH</h3>
+
+                    <small>
+                        GESTÃO INTELIGENTE DE ESTOQUE
+                    </small>
+                </div>
+
+            </div>
+
+
+            <div class="identificacao-documento">
+
+                <strong>
+                    DOCUMENTO GERADO PELO SISTEMA
+                </strong>
+
+                <br>
+
+                Emissão: {{ gerado_em }}
+
+                <br>
+
+                Identificação: FT-REL-{{ tipo|upper }}
+
+            </div>
+
+        </header>
+
+
+        <!-- TÍTULO -->
+        <div class="documento-titulo">
+
+            <h2>{{ titulo }}</h2>
+
+            <p>
+                Relatório elaborado com base nos registros
+                armazenados no banco de dados Flow Tech.
+            </p>
+
+        </div>
+
+
+        <!-- INFORMAÇÕES DO DOCUMENTO -->
+        <div class="informacoes-documento">
+
+            <div class="informacao-item">
+
+                <small>TIPO DE DOCUMENTO</small>
+
+                <strong>{{ titulo }}</strong>
+
+            </div>
+
+
+            <div class="informacao-item">
+
+                <small>TOTAL DE REGISTROS / ITENS</small>
+
+                <strong>{{ total_registros }}</strong>
+
+            </div>
+
+
+            <div class="informacao-item">
+
+                <small>PERÍODO CONSULTADO</small>
+
+                <strong>{{ periodo }}</strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- TABELA -->
+        <h5 class="titulo-tabela">
+            Detalhamento dos registros
+        </h5>
+
+
+        {% if linhas %}
+
+            <div class="table-responsive">
+
+                <table class="tabela-documento">
+
+                    <thead>
+
+                        <tr>
+
+                            {% for coluna in colunas %}
+
+                                <th>{{ coluna }}</th>
+
+                            {% endfor %}
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for linha in linhas %}
+
+                            <tr>
+
+                                {% for valor in linha %}
+
+                                    <td>
+                                        {{ valor if valor is not none and valor != '' else '—' }}
+                                    </td>
+
+                                {% endfor %}
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="mensagem-vazia">
+
+                <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+
+                <strong>
+                    Nenhum registro encontrado.
+                </strong>
+
+                <p class="mb-0 mt-2">
+                    Não existem registros para os critérios selecionados.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+
+        <!-- RODAPÉ -->
+        <footer class="documento-rodape">
+
+            <strong>FLOW TECH</strong>
+
+            <p class="mb-1">
+                Documento gerado automaticamente com informações
+                do banco de dados do sistema.
+            </p>
+
+            <p class="mb-0">
+                Gestão, organização e controle de estoque.
+            </p>
+
+        </footer>
+
+    </section>
+
+</div>
+
+{% endblock %}
