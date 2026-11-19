@@ -11,7 +11,6 @@ SHOW WARNINGS;
 -- -----------------------------------------------------
 -- Schema flowtech
 -- -----------------------------------------------------
-
 -- -----------------------------------------------------
 -- Schema flowtech
 -- -----------------------------------------------------
@@ -125,6 +124,12 @@ CREATE TABLE IF NOT EXISTS `funcionario` (
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
+
+INSERT INTO `funcionario` (`nome`, `CPF`, `e_mail`, `setor`, `cargo`, `salario`, `turno`, `senha`, `telefone`, `data_nascimento`) 
+VALUES ('Rakelly Beatriz', '123.456.789-00', 'rakfbeatrizlowtech@gmail.com', 'Vendas', 'Consultor', 3500.00, 'Matutino', 'rakbeatriz', '(11) 99999-9999', '1990-05-15');
+SELECT * FROM funcionario;
+SELECT * FROM produto;
+SELECT * FROM movimentacao;
 
 SHOW WARNINGS; 
 
