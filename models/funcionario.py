@@ -166,27 +166,57 @@ class Funcionario(CrudBase):
 
     # AUTENTICAÇÃO
 
+
+
+
+
+    
+
+    # AUTENTICAÇÃO COM ARGON2ID
+
     @classmethod
     def autenticar(cls, email, senha):
-        conexao = Database.connect()
+        from security import verificar_senha, gerar_hash_senha
 
-        cursor = conexao.cursor(
-            dictionary=True,
-            buffered=True
-        )
+        conexao = Database.connect()
+        cursor = conexao.cursor(dictionary=True, buffered=True)
 
         try:
             sql = f"""
                 SELECT *
                 FROM {cls.table}
                 WHERE e_mail = %s
-                AND senha = %s
                 LIMIT 1
             """
 
-            cursor.execute(sql, (email, senha))
-
+            cursor.execute(sql, (email,))
             funcionario = cursor.fetchone()
+
+            if not funcionario:
+                return None
+
+            senha_correta, precisa_atualizar = verificar_senha(
+                senha,
+                funcionario["senha"]
+            )
+
+            if not senha_correta:
+                return None
+
+            if precisa_atualizar:
+                novo_hash = gerar_hash_senha(senha)
+
+                cursor.execute(
+                    """
+                    UPDATE funcionario
+                    SET senha = %s
+                    WHERE funcionario_id = %s
+                    """,
+                    (novo_hash, funcionario["funcionario_id"])
+                )
+
+                conexao.commit()
+                funcionario["senha"] = novo_hash
 
             return funcionario
 

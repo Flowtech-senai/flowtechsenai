@@ -46,3 +46,21 @@ yarn-error.*
 /models
 /__pycache__
 /__pycache__
+
+
+# Arquivos com informações secretas
+.env
+.env.*
+!.env.example
+
+# Ambientes virtuais
+venv/
+.venv/
+env/
+
+# Arquivos Python temporários
+__pycache__/
+*.pyc
+
+# Configurações locais
+.vscode/
